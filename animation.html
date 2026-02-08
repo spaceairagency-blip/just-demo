@@ -1,179 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="emerald">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramadan | Topic Hub</title>
+    <title>Ramadan Vlogs | Storage Mode</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        /* === THEME ENGINE VARIABLES === */
+        /* === THEME ENGINE === */
         :root {
             --primary: #00d285; --primary-dark: #00b570; --bg: #f8fafc;
             --header-grad: linear-gradient(135deg, #00d285, #00b570);
-            --text-dark: #1e293b; --text-muted: #64748b; --icon-bg: #ebfaf3;
-            --border: rgba(0, 0, 0, 0.05);
+            --card-bg: #ffffff; --text-dark: #1e293b; --text-muted: #64748b;
+            --border: rgba(0, 0, 0, 0.05); --input-bg: #f1f5f9;
         }
 
         [data-theme="midnight"] {
             --primary: #38bdf8; --primary-dark: #0284c7; --bg: #0f172a;
             --header-grad: linear-gradient(135deg, #1e293b, #334155);
-            --text-dark: #f8fafc; --text-muted: #94a3b8; --icon-bg: rgba(30, 41, 59, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        [data-theme="royal"] {
-            --primary: #a78bfa; --primary-dark: #7c3aed; --bg: #1a1625;
-            --header-grad: linear-gradient(135deg, #2d1b4e, #4b2c85);
-            --text-dark: #ffffff; --text-muted: #c4b5fd; --icon-bg: rgba(45, 27, 78, 0.4);
-            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: #1e293b; --text-dark: #f8fafc; --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1); --input-bg: rgba(255,255,255,0.05);
         }
 
         [data-theme="gold"] {
             --primary: #facc15; --primary-dark: #ca8a04; --bg: #1c1917;
             --header-grad: linear-gradient(135deg, #44403c, #78716c);
-            --text-dark: #ffffff; --text-muted: #d6d3d1; --icon-bg: rgba(68, 64, 60, 0.4);
-            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: #292524; --text-dark: #ffffff; --text-muted: #d6d3d1;
+            --border: rgba(255, 255, 255, 0.1); --input-bg: rgba(0,0,0,0.3);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: 0.3s ease; }
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s ease; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text-dark); min-height: 100vh; padding-bottom: 50px; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-dark);
-            min-height: 100vh;
+        /* Header */
+        header { background: var(--header-grad); padding: 15px 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        nav { max-width: 800px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: white; text-decoration: none; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .theme-dots { display: flex; gap: 8px; align-items: center; }
+        .dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; cursor: pointer; }
+
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+
+        /* Storage Meter */
+        .storage-status {
+            background: var(--card-bg); padding: 12px; border-radius: 15px; 
+            margin-bottom: 20px; border: 1px solid var(--border);
         }
+        .meter-bar { height: 8px; background: var(--input-bg); border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        #meter-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
 
-        /* Toolbar / Header */
-        header {
-            background: var(--header-grad);
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
+        /* Form */
+        .upload-card { background: var(--card-bg); border-radius: 20px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h2 { margin-bottom: 15px; font-size: 1.3rem; color: var(--primary); text-align: center; }
+        .input-group { display: flex; flex-direction: column; gap: 12px; }
+        input { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-dark); padding: 12px; border-radius: 10px; outline: none; font-size: 0.95rem; }
+        
+        .btn-save { background: var(--primary); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1rem; }
+        .btn-save:hover { filter: brightness(1.1); transform: scale(1.01); }
 
-        nav {
-            max-width: 1100px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        /* List */
+        .vlog-card { background: var(--card-bg); border-radius: 20px; padding: 15px; margin-top: 20px; border: 1px solid var(--border); }
+        video { width: 100%; border-radius: 15px; margin: 10px 0; background: #000; }
+        .vlog-info { display: flex; justify-content: space-between; align-items: center; }
+        .del-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
 
-        .back-btn { color: white; text-decoration: none; font-size: 1.2rem; }
-        .logo { font-size: 1.3rem; font-weight: 800; color: white; letter-spacing: 1px; }
-
-        .theme-dots { display: flex; gap: 8px; }
-        .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid white; cursor: pointer; }
-
-        /* Grid Layout */
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--icon-bg);
-            border: 1px solid var(--border);
-            text-decoration: none;
-            padding: 30px 15px;
-            border-radius: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-        }
-
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .card:active { transform: scale(0.95); }
-
-        .card i {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .card h3 {
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            line-height: 1.2;
-            font-weight: 700;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        @media (max-width: 400px) {
-            .cards-grid { grid-template-columns: 1fr; }
-        }
+        #loading { display: none; text-align: center; color: var(--primary); padding-top: 15px; font-weight: 700; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <header>
     <nav>
-        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-        <h2 class="logo">Ramadan</h2>
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Vlogs</a>
         <div class="theme-dots">
+            <span id="auto-msg" style="color:white; font-size:10px; opacity:0.8; margin-right:5px"></span>
             <div class="dot" style="background:#00d285" onclick="setTheme('emerald')"></div>
             <div class="dot" style="background:#38bdf8" onclick="setTheme('midnight')"></div>
-            <div class="dot" style="background:#a78bfa" onclick="setTheme('royal')"></div>
             <div class="dot" style="background:#facc15" onclick="setTheme('gold')"></div>
         </div>
     </nav>
 </header>
 
 <div class="container">
-    <div class="cards-grid">
-        <a href="calender.html" class="card">
-            <i class="fa-solid fa-calendar-days"></i>
-            <h3>Ramadan<br>Calendar</h3>
-        </a>
-
-        <a href="dua-ramadan.html" class="card">
-            <i class="fa-solid fa-hands-praying"></i>
-            <h3>Dua of<br>Ramadan</h3>
-        </a>
-
-        <a href="sf-time.html" class="card">
-            <i class="fa-solid fa-clock"></i>
-            <h3>Sehri &<br>Iftar Time</h3>
-        </a>
-
-        <a href="recipe.html" class="card">
-            <i class="fa-solid fa-video"></i>
-            <h3>Ramadan<br>Vlogs</h3>
-        </a>
+    <div class="storage-status">
+        <div style="display:flex; justify-content:space-between; font-size: 0.75rem; font-weight: 700;">
+            <span>STORAGE USAGE (MAX 5MB)</span>
+            <span id="usage-text">0%</span>
+        </div>
+        <div class="meter-bar"><div id="meter-fill"></div></div>
     </div>
+
+    <div class="upload-card">
+        <h2>🌙 Add New Vlog</h2>
+        <div class="input-group">
+            <div style="display:flex; gap:10px">
+                <input type="number" id="v_day" placeholder="Day" style="width:70px">
+                <input type="text" id="v_title" placeholder="What happened today?" style="flex:1">
+            </div>
+            <input type="file" id="v_file" accept="video/*">
+            <button class="btn-save" onclick="saveVlog()">SAVE VLOG</button>
+        </div>
+        <div id="loading"><i class="fa-solid fa-spinner fa-spin"></i> Processing Video Strings...</div>
+    </div>
+
+    <div id="vlogList"></div>
 </div>
 
-<footer>
-    <span>All rights reserved | Made By Samiyyan</span>
-</footer>
-
 <script>
-    // === THEME ENGINE ===
+    const KEY = "ramadan_vlogs_final";
+
+    // === 1. THEME ENGINE (AUTO-NIGHT) ===
     function setTheme(t) {
         document.documentElement.setAttribute('data-theme', t);
-        localStorage.setItem('user_theme_pref', t);
+        localStorage.setItem('vlog_theme_pref', t);
+        document.getElementById('auto-msg').innerText = (t === 'midnight') ? "NIGHT MODE" : "";
     }
 
-    // Sync theme with localStorage
-    const savedTheme = localStorage.getItem('user_theme_pref') || 'emerald';
-    setTheme(savedTheme);
+    function initTheme() {
+        const saved = localStorage.getItem('vlog_theme_pref');
+        const hour = new Date().getHours();
+        if (!saved) {
+            // Auto-switch: Midnight if after 6 PM or before 6 AM
+            setTheme((hour >= 18 || hour < 6) ? 'midnight' : 'emerald');
+        } else { setTheme(saved); }
+    }
+    initTheme();
+
+    // === 2. STORAGE METER ===
+    function updateMeter() {
+        const limit = 5 * 1024 * 1024; // 5MB
+        const used = encodeURIComponent(JSON.stringify(localStorage)).length;
+        const percent = Math.min((used / limit) * 100, 100).toFixed(1);
+        document.getElementById('meter-fill').style.width = percent + "%";
+        document.getElementById('usage-text').innerText = percent + "%";
+        document.getElementById('meter-fill').style.background = percent > 85 ? "#ff4d4d" : "var(--primary)";
+    }
+
+    // === 3. VLOG LOGIC ===
+    const getVlogs = () => JSON.parse(localStorage.getItem(KEY)) || [];
+
+    function saveVlog() {
+        const file = v_file.files[0];
+        const day = v_day.value;
+        const title = v_title.value;
+
+        if(!file || !day || !title) return alert("Please fill all fields!");
+        if(file.size > 2.5 * 1024 * 1024) return alert("Video too large! LocalStorage only supports very small clips (< 2.5MB).");
+
+        document.getElementById('loading').style.display = "block";
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const data = getVlogs();
+                data.push({ id: Date.now(), day, title, video: e.target.result });
+                localStorage.setItem(KEY, JSON.stringify(data));
+                
+                // Clear & Update
+                v_file.value = ""; v_title.value = ""; v_day.value = "";
+                document.getElementById('loading').style.display = "none";
+                displayVlogs();
+                updateMeter();
+            } catch (err) {
+                alert("CRITICAL: Storage Full! Please delete older vlogs.");
+                document.getElementById('loading').style.display = "none";
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function displayVlogs() {
+        const list = getVlogs().sort((a,b) => b.day - a.day);
+        document.getElementById('vlogList').innerHTML = list.map(v => `
+            <div class="vlog-card">
+                <div class="vlog-info">
+                    <strong>Day ${v.day}: ${v.title}</strong>
+                    <button class="del-btn" onclick="deleteVlog(${v.id})"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <video controls src="${v.video}"></video>
+            </div>
+        `).join('');
+    }
+
+    function deleteVlog(id) {
+        localStorage.setItem(KEY, JSON.stringify(getVlogs().filter(v => v.id !== id)));
+        displayVlogs();
+        updateMeter();
+    }
+
+    // Initial Start
+    displayVlogs();
+    updateMeter();
 </script>
 
 </body>
