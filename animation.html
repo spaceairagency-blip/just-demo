@@ -3,137 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Uber Tracker with Replay</title>
+    <title>Uber Tracker Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
         :root { --uber-blue: #276EF1; --dark: #000; --green: #2ecc71; --red: #e74c3c; }
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #f4f4f4; }
 
-        /* Dashboard & Stats */
         .dashboard {
             position: absolute; top: 10px; left: 10px; right: 10px;
             background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 12px;
-            z-index: 1000; display: flex; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000; display: flex; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
-        .stat-item:last-child { border: none; }
+        .stat-item { flex: 1; text-align: center; }
         .stat-val { font-size: 18px; font-weight: bold; color: var(--dark); }
         .stat-unit { font-size: 9px; color: #777; text-transform: uppercase; }
 
-        /* History Tab */
         #history-panel {
             position: absolute; bottom: -300px; left: 0; right: 0; height: 250px;
             background: white; z-index: 1001; transition: 0.5s;
             border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
         }
         #history-panel.active { bottom: 0; }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        /* Buttons */
+
         .controls { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; justify-content: space-between; z-index: 1000; }
         .btn { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 20px; }
         .start-btn { background: var(--green); color: white; }
         .stop-btn { background: var(--red); color: white; }
-        .history-btn { background: var(--uber-blue); color: white; }
-        .replay-btn { background: var(--dark); color: white; padding: 10px 20px; border-radius: 8px; width: auto; height: auto; font-size: 14px; }
-
-        #map { width: 100%; height: 100vh; }
-        .car-icon { transition: 0.2s linear; }
+        .history-btn { background: white; color: var(--uber-blue); }
+        
+        #map { width: 100%; height: 100vh; z-index: 1; }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
         <div class="stat-item"><div id="speed" class="stat-val">0</div><div class="stat-unit">km/h</div></div>
-        <div class="stat-item"><div id="dist" class="stat-val">0.00</div><div class="stat-unit">km</div></div>
+        <div class="stat-item"><div id="dist" class="stat-val">0.00</div><div class="stat-unit">Total km</div></div>
         <div class="stat-item"><div id="weather" class="stat-val">--°C</div><div class="stat-unit">Temp</div></div>
     </div>
 
     <div id="map"></div>
 
     <div id="history-panel">
-        <div class="history-header">
-            <strong>Last Journey Video Replay</strong>
+        <div style="display:flex; justify-content:space-between;">
+            <strong>Journey History</strong>
             <button onclick="toggleHistory()" style="background:none; border:none; font-size:20px;">&times;</button>
         </div>
-        <p id="history-info">No journey saved yet.</p>
-        <button id="replay-trigger" class="replay-btn" onclick="replayJourney()" style="display:none;">
-            <i class="fas fa-play"></i> Watch Live Replay
-        </button>
+        <p id="history-info">Loading saved data...</p>
+        <button id="replay-btn" class="btn" style="width:100%; border-radius:8px; background:var(--dark); color:white; font-size:14px; margin-top:10px;" onclick="replayJourney()">Watch Last Trip Replay</button>
+        <button class="btn" style="width:100%; border-radius:8px; background:var(--red); color:white; font-size:14px; margin-top:5px;" onclick="clearData()">Clear All Data</button>
     </div>
 
     <div class="controls">
-        <button id="main-btn" class="btn start-btn" onclick="handleTracking()"><i class="fas fa-play"></i></button>
+        <button id="main-btn" class="btn start-btn" onclick="toggleTracking()"><i class="fas fa-play"></i></button>
         <button class="btn history-btn" onclick="toggleHistory()"><i class="fas fa-history"></i></button>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const API_KEY = "8bc7e583c218683e33b93f18e5904031";
-        let map, carMarker, isTracking = false;
-        let pathHistory = []; // Stores all coordinates
-        let totalDistance = 0, lastLatLng = null;
+        let map, carMarker, isTracking = false, isUserMovingMap = false;
+        let lastLatLng = null;
 
-        // Initialize Map
-        map = L.map('map', { zoomControl: false }).setView([23.8103, 90.4125], 15);
+        // Load data from LocalStorage
+        let pathHistory = JSON.parse(localStorage.getItem('trip_path')) || [];
+        let totalDistance = parseFloat(localStorage.getItem('trip_dist')) || 0;
+
+        // 1. Initialize Map
+        map = L.map('map', { zoomControl: false }).setView([23.81, 90.41], 15);
         L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
             maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3']
         }).addTo(map);
 
-        function handleTracking() {
-            const btn = document.getElementById('main-btn');
-            if (!isTracking) {
-                isTracking = true;
-                pathHistory = []; // Reset history
-                btn.className = 'btn stop-btn';
-                btn.innerHTML = '<i class="fas fa-stop"></i>';
-                startGPS();
-            } else {
-                isTracking = false;
-                btn.className = 'btn start-btn';
-                btn.innerHTML = '<i class="fas fa-play"></i>';
-                saveToHistory();
+        // 2. ALWAYS-ON Tracking for visibility
+        function initGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(updateGPS, null, { enableHighAccuracy: true });
             }
         }
 
-        function startGPS() {
-            navigator.geolocation.watchPosition(pos => {
-                if (!isTracking) return;
-                const { latitude, longitude, speed, heading } = pos.coords;
-                const currentLoc = [latitude, longitude];
-                
-                // Update Stats
-                document.getElementById('speed').innerText = Math.round((speed || 0) * 3.6);
-                updateWeather(latitude, longitude);
+        function updateGPS(pos) {
+            const { latitude, longitude, speed, heading } = pos.coords;
+            const currentLoc = [latitude, longitude];
 
-                // Update Map & Car
-                updateCarMarker(currentLoc, heading || 0);
-                
+            // Update car marker even if not recording
+            updateCarUI(currentLoc, heading || 0);
+            updateWeather(latitude, longitude);
+            
+            if (!isUserMovingMap) map.panTo(currentLoc);
+
+            // Record only if "Start" is pressed
+            if (isTracking) {
                 if (lastLatLng) {
                     const d = map.distance(lastLatLng, currentLoc) / 1000;
                     totalDistance += d;
-                    document.getElementById('dist').innerText = totalDistance.toFixed(2);
+                    localStorage.setItem('trip_dist', totalDistance);
                     
-                    // Draw Live Path
+                    // Draw Line
                     L.polyline([lastLatLng, currentLoc], {color: '#276EF1', weight: 5}).addTo(map);
                 }
-
                 pathHistory.push({loc: currentLoc, head: heading || 0});
+                localStorage.setItem('trip_path', JSON.stringify(pathHistory));
                 lastLatLng = currentLoc;
-                map.panTo(currentLoc);
-            }, null, { enableHighAccuracy: true });
+            }
+            
+            document.getElementById('speed').innerText = Math.round((speed || 0) * 3.6);
+            document.getElementById('dist').innerText = totalDistance.toFixed(2);
         }
 
-        function updateCarMarker(loc, rotation) {
+        function updateCarUI(loc, rotation) {
             const icon = L.divIcon({
                 className: 'car-icon',
-                html: `<i class="fas fa-car" style="font-size:25px; transform:rotate(${rotation}deg); color:black;"></i>`,
+                html: `<i class="fas fa-car" style="font-size:25px; transform:rotate(${rotation}deg); color:black; text-shadow: 0 0 3px white;"></i>`,
                 iconSize: [30, 30], iconAnchor: [15, 15]
             });
             if (!carMarker) carMarker = L.marker(loc, {icon: icon}).addTo(map);
             else carMarker.setLatLng(loc).setIcon(icon);
+        }
+
+        function toggleTracking() {
+            const btn = document.getElementById('main-btn');
+            isTracking = !isTracking;
+            if (isTracking) {
+                btn.className = 'btn stop-btn';
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                lastLatLng = carMarker ? carMarker.getLatLng() : null;
+            } else {
+                btn.className = 'btn start-btn';
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+            }
         }
 
         async function updateWeather(lat, lon) {
@@ -146,36 +146,30 @@
 
         function toggleHistory() {
             document.getElementById('history-panel').classList.toggle('active');
+            document.getElementById('history-info').innerText = `Saved Trip: ${pathHistory.length} points logged.`;
         }
 
-        function saveToHistory() {
-            if (pathHistory.length > 0) {
-                document.getElementById('history-info').innerText = `Journey recorded: ${pathHistory.length} points.`;
-                document.getElementById('replay-trigger').style.display = 'block';
+        function clearData() {
+            if(confirm("Delete all history?")) {
+                localStorage.clear();
+                location.reload();
             }
         }
 
-        // --- LIVE VIDEO REPLAY FUNCTION ---
         function replayJourney() {
-            if (pathHistory.length === 0) return;
-            toggleHistory(); // Close panel
-            
-            // Clear current map markers if any
-            map.setView(pathHistory[0].loc, 17);
+            if (pathHistory.length < 2) return alert("Not enough data to replay!");
+            toggleHistory();
             let i = 0;
-            
             const interval = setInterval(() => {
-                if (i >= pathHistory.length) {
-                    clearInterval(interval);
-                    alert("Replay Finished!");
-                    return;
-                }
-                const step = pathHistory[i];
-                updateCarMarker(step.loc, step.head);
-                map.panTo(step.loc);
+                if (i >= pathHistory.length) return clearInterval(interval);
+                updateCarUI(pathHistory[i].loc, pathHistory[i].head);
+                map.panTo(pathHistory[i].loc);
                 i++;
-            }, 100); // Speed of the "Video"
+            }, 100);
         }
+
+        window.onload = initGPS;
+        map.on('movestart', () => isUserMovingMap = true);
     </script>
 </body>
 </html>
