@@ -3,160 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Uber Style Tracker</title>
+    <title>Uber Tracker with Replay</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        :root { --uber-blue: #276EF1; --dark: #000; --green: #2ecc71; --red: #e74c3c; --orange: #f39c12; }
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #000; }
+        :root { --uber-blue: #276EF1; --dark: #000; --green: #2ecc71; --red: #e74c3c; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
+        /* Dashboard & Stats */
         .dashboard {
             position: absolute; top: 10px; left: 10px; right: 10px;
-            background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 16px;
-            z-index: 1000; display: flex; flex-wrap: wrap; gap: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 12px;
+            z-index: 1000; display: flex; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
-        .stat-item { flex: 1; text-align: center; min-width: 60px; }
-        .stat-val { font-size: 20px; font-weight: 900; color: var(--dark); }
-        .stat-unit { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-item { flex: 1; text-align: center; border-right: 1px solid #eee; }
+        .stat-item:last-child { border: none; }
+        .stat-val { font-size: 18px; font-weight: bold; color: var(--dark); }
+        .stat-unit { font-size: 9px; color: #777; text-transform: uppercase; }
 
-        #weather-box { width: 100%; text-align: center; font-size: 11px; font-weight: bold; color: var(--uber-blue); border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px; }
-
-        .controls {
-            position: absolute; bottom: 30px; left: 20px; right: 20px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        /* History Tab */
+        #history-panel {
+            position: absolute; bottom: -300px; left: 0; right: 0; height: 250px;
+            background: white; z-index: 1001; transition: 0.5s;
+            border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
         }
-
-        .btn {
-            width: 60px; height: 60px; border-radius: 50%; border: none;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
-        }
-        .start-btn { background: var(--green); color: white; font-size: 24px; }
-        .stop-btn { background: var(--red); color: white; font-size: 24px; }
-        .recenter-btn { background: white; color: var(--uber-blue); font-size: 22px; }
+        #history-panel.active { bottom: 0; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        /* Buttons */
+        .controls { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; justify-content: space-between; z-index: 1000; }
+        .btn { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 20px; }
+        .start-btn { background: var(--green); color: white; }
+        .stop-btn { background: var(--red); color: white; }
+        .history-btn { background: var(--uber-blue); color: white; }
+        .replay-btn { background: var(--dark); color: white; padding: 10px 20px; border-radius: 8px; width: auto; height: auto; font-size: 14px; }
 
         #map { width: 100%; height: 100vh; }
-        .car-marker { transition: transform 0.3s linear; }
+        .car-icon { transition: 0.2s linear; }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
-        <div class="stat-item">
-            <div id="speed-num" class="stat-val">0</div>
-            <div class="stat-unit">km/h</div>
-        </div>
-        <div class="stat-item">
-            <div id="timer-val" class="stat-val">00:00</div>
-            <div class="stat-unit">Time</div>
-        </div>
-        <div class="stat-item">
-            <div id="dist-val" class="stat-val">0.00</div>
-            <div class="stat-unit">Distance</div>
-        </div>
-        <div id="weather-box"><i class="fas fa-sun"></i> Waiting for GPS...</div>
+        <div class="stat-item"><div id="speed" class="stat-val">0</div><div class="stat-unit">km/h</div></div>
+        <div class="stat-item"><div id="dist" class="stat-val">0.00</div><div class="stat-unit">km</div></div>
+        <div class="stat-item"><div id="weather" class="stat-val">--°C</div><div class="stat-unit">Temp</div></div>
     </div>
 
     <div id="map"></div>
 
+    <div id="history-panel">
+        <div class="history-header">
+            <strong>Last Journey Video Replay</strong>
+            <button onclick="toggleHistory()" style="background:none; border:none; font-size:20px;">&times;</button>
+        </div>
+        <p id="history-info">No journey saved yet.</p>
+        <button id="replay-trigger" class="replay-btn" onclick="replayJourney()" style="display:none;">
+            <i class="fas fa-play"></i> Watch Live Replay
+        </button>
+    </div>
+
     <div class="controls">
-        <button id="main-btn" class="btn start-btn" onclick="toggleTracking()"><i class="fas fa-play"></i></button>
-        <button class="btn recenter-btn" onclick="recenterMap()"><i class="fas fa-location-arrow"></i></button>
+        <button id="main-btn" class="btn start-btn" onclick="handleTracking()"><i class="fas fa-play"></i></button>
+        <button class="btn history-btn" onclick="toggleHistory()"><i class="fas fa-history"></i></button>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const API_KEY = "8bc7e583c218683e33b93f18e5904031"; // Validated OpenWeather Key
-        let isTracking = false, startTime, timerInterval, totalDist = 0;
-        let lastPos = null, carMarker = null, isUserMoving = false;
+        const API_KEY = "8bc7e583c218683e33b93f18e5904031";
+        let map, carMarker, isTracking = false;
+        let pathHistory = []; // Stores all coordinates
+        let totalDistance = 0, lastLatLng = null;
 
-        const map = L.map('map', { zoomControl: false }).setView([23.95, 90.26], 15);
+        // Initialize Map
+        map = L.map('map', { zoomControl: false }).setView([23.8103, 90.4125], 15);
         L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3']
         }).addTo(map);
 
-        function toggleTracking() {
+        function handleTracking() {
             const btn = document.getElementById('main-btn');
             if (!isTracking) {
                 isTracking = true;
-                startTime = new Date();
-                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                pathHistory = []; // Reset history
                 btn.className = 'btn stop-btn';
-                startTimer();
-                navigator.geolocation.watchPosition(updatePos, null, { enableHighAccuracy: true });
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                startGPS();
             } else {
-                location.reload();
+                isTracking = false;
+                btn.className = 'btn start-btn';
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                saveToHistory();
             }
         }
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                const diff = new Date(new Date() - startTime);
-                document.getElementById('timer-val').innerText = 
-                    `${String(diff.getUTCMinutes()).padStart(2, '0')}:${String(diff.getUTCSeconds()).padStart(2, '0')}`;
-            }, 1000);
+        function startGPS() {
+            navigator.geolocation.watchPosition(pos => {
+                if (!isTracking) return;
+                const { latitude, longitude, speed, heading } = pos.coords;
+                const currentLoc = [latitude, longitude];
+                
+                // Update Stats
+                document.getElementById('speed').innerText = Math.round((speed || 0) * 3.6);
+                updateWeather(latitude, longitude);
+
+                // Update Map & Car
+                updateCarMarker(currentLoc, heading || 0);
+                
+                if (lastLatLng) {
+                    const d = map.distance(lastLatLng, currentLoc) / 1000;
+                    totalDistance += d;
+                    document.getElementById('dist').innerText = totalDistance.toFixed(2);
+                    
+                    // Draw Live Path
+                    L.polyline([lastLatLng, currentLoc], {color: '#276EF1', weight: 5}).addTo(map);
+                }
+
+                pathHistory.push({loc: currentLoc, head: heading || 0});
+                lastLatLng = currentLoc;
+                map.panTo(currentLoc);
+            }, null, { enableHighAccuracy: true });
+        }
+
+        function updateCarMarker(loc, rotation) {
+            const icon = L.divIcon({
+                className: 'car-icon',
+                html: `<i class="fas fa-car" style="font-size:25px; transform:rotate(${rotation}deg); color:black;"></i>`,
+                iconSize: [30, 30], iconAnchor: [15, 15]
+            });
+            if (!carMarker) carMarker = L.marker(loc, {icon: icon}).addTo(map);
+            else carMarker.setLatLng(loc).setIcon(icon);
         }
 
         async function updateWeather(lat, lon) {
             try {
                 const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
                 const data = await res.json();
-                document.getElementById('weather-box').innerHTML = 
-                    `<i class="fas fa-cloud"></i> ${data.weather[0].main} | <i class="fas fa-temperature-high"></i> ${Math.round(data.main.temp)}°C`;
-            } catch (e) { console.log("Weather Error"); }
+                document.getElementById('weather').innerText = Math.round(data.main.temp) + "°C";
+            } catch(e) {}
         }
 
-        function updatePos(pos) {
-            if (!isTracking) return;
-            const { latitude, longitude, speed, heading } = pos.coords;
-            const currentPos = [latitude, longitude];
-            const currentSpeed = (speed || 0) * 3.6;
+        function toggleHistory() {
+            document.getElementById('history-panel').classList.toggle('active');
+        }
 
-            document.getElementById('speed-num').innerText = Math.round(currentSpeed);
-            updateWeather(latitude, longitude);
-
-            // Uber Car Icon with Rotation
-            const carIcon = L.divIcon({
-                className: 'car-marker',
-                html: `<i class="fas fa-car" style="font-size: 28px; color: black; transform: rotate(${heading || 0}deg); text-shadow: 0 0 5px white;"></i>`,
-                iconSize: [30, 30], iconAnchor: [15, 15]
-            });
-
-            if (!carMarker) {
-                carMarker = L.marker(currentPos, { icon: carIcon }).addTo(map);
-            } else {
-                carMarker.setLatLng(currentPos).setIcon(carIcon);
+        function saveToHistory() {
+            if (pathHistory.length > 0) {
+                document.getElementById('history-info').innerText = `Journey recorded: ${pathHistory.length} points.`;
+                document.getElementById('replay-trigger').style.display = 'block';
             }
-
-            // Traffic Line Logic
-            if (lastPos) {
-                const d = calculateDistance(lastPos[0], lastPos[1], latitude, longitude);
-                totalDist += d;
-                document.getElementById('dist-val').innerText = totalDist.toFixed(2);
-
-                let color = 'var(--green)';
-                if (currentSpeed < 10) color = 'var(--red)';
-                else if (currentSpeed < 25) color = 'var(--orange)';
-
-                L.polyline([lastPos, currentPos], { color: color, weight: 7, opacity: 0.9 }).addTo(map);
-            }
-
-            if (!isUserMoving) map.panTo(currentPos);
-            lastPos = currentPos;
         }
 
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        // --- LIVE VIDEO REPLAY FUNCTION ---
+        function replayJourney() {
+            if (pathHistory.length === 0) return;
+            toggleHistory(); // Close panel
+            
+            // Clear current map markers if any
+            map.setView(pathHistory[0].loc, 17);
+            let i = 0;
+            
+            const interval = setInterval(() => {
+                if (i >= pathHistory.length) {
+                    clearInterval(interval);
+                    alert("Replay Finished!");
+                    return;
+                }
+                const step = pathHistory[i];
+                updateCarMarker(step.loc, step.head);
+                map.panTo(step.loc);
+                i++;
+            }, 100); // Speed of the "Video"
         }
-
-        function recenterMap() { isUserMoving = false; if (lastPos) map.flyTo(lastPos, 18); }
-        map.on('movestart', () => isUserMoving = true);
     </script>
 </body>
 </html>
