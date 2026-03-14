@@ -3,362 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta name="google-site-verification" content="s4fu7VY947YdFAtnkEHCvX2C7i5OTLOVCVsAXQ-GuXQ" />
-    <title>Eid Mubarak | Personal Experience</title>
+    <title>Uber Style Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@300;400;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --gold: #f1c40f; --deep-blue: #090a0f; --success: #2ecc71; }
-        * { box-sizing: border-box; }
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100dvh;
-            background: var(--deep-blue);
-            font-family: 'Poppins', sans-serif;
-            color: white;
-            overflow-x: hidden;
+        :root { --uber-blue: #276EF1; --dark: #000; --green: #2ecc71; --red: #e74c3c; --orange: #f39c12; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #000; }
+
+        .dashboard {
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 16px;
+            z-index: 1000; display: flex; flex-wrap: wrap; gap: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+        }
+        .stat-item { flex: 1; text-align: center; min-width: 60px; }
+        .stat-val { font-size: 20px; font-weight: 900; color: var(--dark); }
+        .stat-unit { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+        #weather-box { width: 100%; text-align: center; font-size: 11px; font-weight: bold; color: var(--uber-blue); border-top: 1px solid #eee; padding-top: 8px; margin-top: 5px; }
+
+        .controls {
+            position: absolute; bottom: 30px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
 
-        /* --- New Login Header Styles --- */
-        .auth-nav {
-            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; z-index: 1000; background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
+        .btn {
+            width: 60px; height: 60px; border-radius: 50%; border: none;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
         }
-        #user-profile { display: none; align-items: center; gap: 10px; }
-        #profile-pic { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--gold); }
-        .user-name-text { font-family: 'Bungee'; font-size: 0.7rem; color: var(--gold); }
-        .logout-link { font-size: 10px; color: #ff4757; cursor: pointer; text-decoration: underline; margin-left: 5px; }
+        .start-btn { background: var(--green); color: white; font-size: 24px; }
+        .stop-btn { background: var(--red); color: white; font-size: 24px; }
+        .recenter-btn { background: white; color: var(--uber-blue); font-size: 22px; }
 
-        #bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
-            z-index: -2;
-        }
-        #stars-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        
-        .controls { position: fixed; top: 70px; right: 20px; z-index: 100; }
-        .control-btn {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px);
-            width: 40px; height: 40px; display: grid; place-items: center;
-        }
-
-        .main-wrapper { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100dvh; 
-            padding: 80px 20px 40px;
-            gap: 20px;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2); padding: clamp(20px, 5vw, 40px);
-            border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            width: 100%; max-width: 400px; text-align: center;
-        }
-
-        h1 {
-            font-family: 'Bungee', cursive; font-size: clamp(1.4rem, 8vw, 2.2rem);
-            background: linear-gradient(to bottom, #fff, var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin: 10px 0;
-        }
-
-        .countdown-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
-        @media (min-width: 400px) { .countdown-grid { grid-template-columns: repeat(4, 1fr); } }
-        .time-box { background: rgba(0, 0, 0, 0.5); padding: 15px 5px; border-radius: 15px; border-bottom: 3px solid var(--gold); }
-        .num { display: block; font-family: 'Bungee'; font-size: 1.5rem; color: var(--gold); }
-        .label { font-size: 0.6rem; opacity: 0.7; }
-
-        .salami-wrapper {
-            width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden; margin-top: 10px;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        thead { background: rgba(241, 196, 15, 0.15); color: var(--gold); font-family: 'Bungee'; }
-        th, td { padding: 15px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .symbol { color: var(--gold); font-weight: 900; }
-
-        .button-group { display: flex; gap: 10px; margin-top: 15px; }
-        .mega-btn {
-            background: linear-gradient(135deg, var(--gold), #f39c12); color: #000;
-            border: none; padding: 16px; font-family: 'Bungee'; border-radius: 50px;
-            width: 100%; cursor: pointer; transition: all 0.3s ease;
-            font-size: 0.8rem;
-        }
-        .mega-btn:active { transform: scale(0.95); }
-        .secondary-btn { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
-        
-        .audio-player-container {
-            position: fixed; bottom: 20px; left: 20px; z-index: 1000;
-            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 15px;
-            padding: 10px 15px; display: none; align-items: center; gap: 12px;
-            width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .audio-btn {
-            background: var(--gold); border: none; width: 35px; height: 35px;
-            border-radius: 50%; cursor: pointer; display: grid; place-items: center;
-            font-size: 0.8rem; color: black; transition: 0.2s;
-        }
-        .audio-info { flex-grow: 1; overflow: hidden; }
-        .track-name { font-size: 0.7rem; font-family: 'Bungee'; color: var(--gold); display: block; }
-        .audio-progress-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 5px; cursor: pointer; }
-        .audio-progress-fill { height: 100%; background: var(--gold); width: 0%; border-radius: 2px; }
-
-        #scene-icon { font-size: 80px; display: block; margin-bottom: 10px; }
-        #scene-text { font-family: 'Bungee'; min-height: 4em; display: grid; place-items: center; }
-        #progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin: 20px 0; }
-        #progress-bar { width: 0%; height: 100%; background: var(--gold); }
-        #share-canvas { display: none; }
-        
+        #map { width: 100%; height: 100vh; }
+        .car-marker { transition: transform 0.3s linear; }
     </style>
 </head>
 <body>
-    <nav class="auth-nav">
-        <div style="font-family:'Bungee'; color: var(--gold); font-size: 0.8rem;">EID 2026</div>
-        
-        <div id="login-container">
-            <div id="g_id_onload"
-                 data-client_id="226374557186-fohlio38gmggf67kl8ntffivka256nm5.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin" data-type="standard" data-theme="filled_black" data-size="small"></div>
-        </div>
 
-        <div id="user-profile">
-            <span class="user-name-text" id="header-user-name"></span>
-            <img id="profile-pic" src="" alt="Profile" referrerpolicy="no-referrer">
-            <span class="logout-link" onclick="logout()">Logout</span>
+    <div class="dashboard">
+        <div class="stat-item">
+            <div id="speed-num" class="stat-val">0</div>
+            <div class="stat-unit">km/h</div>
         </div>
-    </nav>
+        <div class="stat-item">
+            <div id="timer-val" class="stat-val">00:00</div>
+            <div class="stat-unit">Time</div>
+        </div>
+        <div class="stat-item">
+            <div id="dist-val" class="stat-val">0.00</div>
+            <div class="stat-unit">Distance</div>
+        </div>
+        <div id="weather-box"><i class="fas fa-sun"></i> Waiting for GPS...</div>
+    </div>
 
-    <div id="bg"></div>
-    <canvas id="stars-canvas"></canvas>
-    <canvas id="share-canvas" width="600" height="600"></canvas>
+    <div id="map"></div>
 
     <div class="controls">
-        <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+        <button id="main-btn" class="btn start-btn" onclick="toggleTracking()"><i class="fas fa-play"></i></button>
+        <button class="btn recenter-btn" onclick="recenterMap()"><i class="fas fa-location-arrow"></i></button>
     </div>
 
-    <div id="audio-ui" class="audio-player-container">
-        <button id="audio-toggle" class="audio-btn">▶</button>
-        <div class="audio-info">
-            <span class="track-name">Eid Takbeer</span>
-            <div class="audio-progress-bg" id="audio-track-bg">
-                <div class="audio-progress-fill" id="audio-track-fill"></div>
-            </div>
-        </div>
-        <audio id="eid-audio">
-            <source src="Eid-Takbeer.mp3" type="audio/mpeg">
-        </audio>
-    </div>
-
-    <div class="main-wrapper">
-        <div id="countdown-ui" class="glass-card">
-            <p style="font-size: 0.7rem; letter-spacing: 3px; color: var(--gold); margin: 0;">EID AL-FITR 2026</p>
-            <h1>EID IS COMING</h1>
-            <div class="button-group">
-                <button onclick="shareCountdown()" class="mega-btn">Share Stats</button>
-                <button onclick="copyLink(this)" class="mega-btn secondary-btn">Copy Link</button>
-            </div>
-            <div class="countdown-grid">
-                <div class="time-box"><span class="num" id="days">00</span><span class="label">DAYS</span></div>
-                <div class="time-box"><span class="num" id="hours">00</span><span class="label">HRS</span></div>
-                <div class="time-box"><span class="num" id="mins">00</span><span class="label">MINS</span></div>
-                <div class="time-box"><span class="num" id="secs">00</span><span class="label">SECS</span></div>
-            </div>
-        </div>
-
-        <div id="eid-ui" class="glass-card" style="display: none;">
-            <div style="font-size: 60px;">🌙</div>
-            <h1>EID MUBARAK</h1>
-            <button class="mega-btn" onclick="startStoryWithAuth()">WATCH EID JOURNEY</button>
-        </div>
-        
-        <div id="story-ui" class="glass-card" style="display: none;">
-            <span id="scene-icon">🌙</span>
-            <div id="scene-text">PREPARING...</div>
-            <div id="progress-container"><div id="progress-bar"></div></div>
-            <div id="final-actions" style="display: none;">
-                <button class="mega-btn secondary-btn" onclick="shareExperience()">SHARE GIFT CARD 🎁</button>
-                <button class="mega-btn" onclick="location.reload()" style="margin-top:10px;">REPLAY JOURNEY 🔄</button>
-            </div>
-        </div>
-
-        <div class="salami-wrapper">
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Salami</th><th>Symbol</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Lopa Yeasmin</td><td>50 + 50 = 100</td><td class="symbol">৳</td></tr>
-                    <tr><td>Tahia Yeasmin</td><td>50 + 50 = 100</td><td class="symbol">৳</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const eidDate = new Date("2026-03-20T18:40:00").getTime(); 
-        let globalUserName = "Friend";
+        const API_KEY = "8bc7e583c218683e33b93f18e5904031"; // Validated OpenWeather Key
+        let isTracking = false, startTime, timerInterval, totalDist = 0;
+        let lastPos = null, carMarker = null, isUserMoving = false;
 
-        // --- AUTH LOGIC ---
-        function handleCredentialResponse(response) {
-            const payload = decodeJwtResponse(response.credential);
-            
-            // Save to LocalStorage
-            localStorage.setItem("eid_user_name", payload.name);
-            localStorage.setItem("eid_user_pic", payload.picture);
-            
-            updateAuthUI(payload.name, payload.picture);
-        }
+        const map = L.map('map', { zoomControl: false }).setView([23.95, 90.26], 15);
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
 
-        function updateAuthUI(name, pic) {
-            globalUserName = name;
-            document.getElementById("header-user-name").innerText = name.split(' ')[0];
-            document.getElementById("profile-pic").src = pic;
-            document.getElementById("login-container").style.display = "none";
-            document.getElementById("user-profile").style.display = "flex";
-        }
-
-        function decodeJwtResponse(token) {
-            var base64Url = token.split('.')[1];
-            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        // Check for existing session on load
-        window.addEventListener('load', () => {
-            const savedName = localStorage.getItem("eid_user_name");
-            const savedPic = localStorage.getItem("eid_user_pic");
-            if(savedName && savedPic) {
-                updateAuthUI(savedName, savedPic);
-            }
-        });
-
-        // --- ORIGINAL APP LOGIC ---
-        const audio = document.getElementById('eid-audio');
-        const audioBtn = document.getElementById('audio-toggle');
-        const audioFill = document.getElementById('audio-track-fill');
-        const audioUI = document.getElementById('audio-ui');
-
-        function updateClock() {
-            const now = new Date().getTime();
-            const distance = eidDate - now;
-
-            if (distance < 0) {
-                document.getElementById('countdown-ui').style.display = 'none';
-                document.getElementById('eid-ui').style.display = 'block';
-                audioUI.style.display = 'flex';
+        function toggleTracking() {
+            const btn = document.getElementById('main-btn');
+            if (!isTracking) {
+                isTracking = true;
+                startTime = new Date();
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                btn.className = 'btn stop-btn';
+                startTimer();
+                navigator.geolocation.watchPosition(updatePos, null, { enableHighAccuracy: true });
             } else {
-                audioUI.style.display = 'none';
-                document.getElementById('days').innerText = Math.floor(distance / 86400000).toString().padStart(2, '0');
-                document.getElementById('hours').innerText = Math.floor((distance % 86400000) / 3600000).toString().padStart(2, '0');
-                document.getElementById('mins').innerText = Math.floor((distance % 3600000) / 60000).toString().padStart(2, '0');
-                document.getElementById('secs').innerText = Math.floor((distance % 60000) / 1000).toString().padStart(2, '0');
+                location.reload();
             }
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        audioBtn.addEventListener('click', () => {
-            if (audio.paused) { audio.play(); audioBtn.innerText = "⏸"; }
-            else { audio.pause(); audioBtn.innerText = "▶"; }
-        });
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const diff = new Date(new Date() - startTime);
+                document.getElementById('timer-val').innerText = 
+                    `${String(diff.getUTCMinutes()).padStart(2, '0')}:${String(diff.getUTCSeconds()).padStart(2, '0')}`;
+            }, 1000);
+        }
 
-        audio.addEventListener('timeupdate', () => {
-            audioFill.style.width = (audio.currentTime / audio.duration) * 100 + "%";
-        });
+        async function updateWeather(lat, lon) {
+            try {
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
+                const data = await res.json();
+                document.getElementById('weather-box').innerHTML = 
+                    `<i class="fas fa-cloud"></i> ${data.weather[0].main} | <i class="fas fa-temperature-high"></i> ${Math.round(data.main.temp)}°C`;
+            } catch (e) { console.log("Weather Error"); }
+        }
 
-        function copyLink(btn) {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                const old = btn.innerText; btn.innerText = "COPIED! ✅";
-                setTimeout(() => btn.innerText = old, 2000);
+        function updatePos(pos) {
+            if (!isTracking) return;
+            const { latitude, longitude, speed, heading } = pos.coords;
+            const currentPos = [latitude, longitude];
+            const currentSpeed = (speed || 0) * 3.6;
+
+            document.getElementById('speed-num').innerText = Math.round(currentSpeed);
+            updateWeather(latitude, longitude);
+
+            // Uber Car Icon with Rotation
+            const carIcon = L.divIcon({
+                className: 'car-marker',
+                html: `<i class="fas fa-car" style="font-size: 28px; color: black; transform: rotate(${heading || 0}deg); text-shadow: 0 0 5px white;"></i>`,
+                iconSize: [30, 30], iconAnchor: [15, 15]
             });
-        }
 
-        // Updated start function to use Google Name
-        function startStoryWithAuth() {
-            audio.play(); 
-            audioBtn.innerText = "⏸";
-            startStory();
-        }
-
-        async function startStory() {
-            document.getElementById('eid-ui').style.display = 'none';
-            document.getElementById('story-ui').style.display = 'block';
-            const scenes = [
-                { i: "🚶‍♂️🕌", t: `Hey ${globalUserName}, Mosque time!`, d: 2000 },
-                { i: "🤝✨", t: "Eid Prayer", d: 2500 },
-                { i: "🏠🚶‍♂️", t: "Going home...", d: 1500 },
-                { i: "🥣😋", t: "Eid Treats!", d: 2500 },
-                { i: "🥳🎉", t: `EID MUBARAK!`, d: 5000, finale: true }
-            ];
-            const icon = document.getElementById('scene-icon');
-            const txt = document.getElementById('scene-text');
-            const bar = document.getElementById('progress-bar');
-
-            for (let res of scenes) {
-                icon.style.opacity = "0"; await new Promise(r => setTimeout(r, 200));
-                icon.innerText = res.i; txt.innerText = res.t; icon.style.opacity = "1";
-                bar.style.transition = "none"; bar.style.width = "0%";
-                setTimeout(() => { bar.style.transition = `width ${res.d}ms linear`; bar.style.width = "100%"; }, 50);
-                if (res.finale) {
-                    setInterval(() => {
-                        confetti({ particleCount: 30, spread: 50, origin: { x: 0.5, y: 0.7 } });
-                    }, 450); 
-                }
-                await new Promise(r => setTimeout(r, res.d));
-            }
-            document.getElementById('final-actions').style.display = 'block';
-        }
-
-        // Star Background
-        const sCanvas = document.getElementById('stars-canvas');
-        const sCtx = sCanvas.getContext('2d');
-        let stars = [];
-        function init() {
-            sCanvas.width = window.innerWidth; sCanvas.height = window.innerHeight;
-            stars = Array(50).fill().map(() => ({ x: Math.random()*sCanvas.width, y: Math.random()*sCanvas.height, v: Math.random()*0.5 }));
-        }
-        function draw() {
-            sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
-            sCtx.fillStyle = "white";
-            stars.forEach(s => {
-                sCtx.beginPath(); sCtx.arc(s.x, s.y, 1, 0, Math.PI*2); sCtx.fill();
-                s.y += s.v; if(s.y > sCanvas.height) s.y = 0;
-            });
-            requestAnimationFrame(draw);
-        }
-        window.onresize = init; init(); draw();
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+            if (!carMarker) {
+                carMarker = L.marker(currentPos, { icon: carIcon }).addTo(map);
             } else {
-                if (document.exitFullscreen) document.exitFullscreen();
+                carMarker.setLatLng(currentPos).setIcon(carIcon);
             }
+
+            // Traffic Line Logic
+            if (lastPos) {
+                const d = calculateDistance(lastPos[0], lastPos[1], latitude, longitude);
+                totalDist += d;
+                document.getElementById('dist-val').innerText = totalDist.toFixed(2);
+
+                let color = 'var(--green)';
+                if (currentSpeed < 10) color = 'var(--red)';
+                else if (currentSpeed < 25) color = 'var(--orange)';
+
+                L.polyline([lastPos, currentPos], { color: color, weight: 7, opacity: 0.9 }).addTo(map);
+            }
+
+            if (!isUserMoving) map.panTo(currentPos);
+            lastPos = currentPos;
         }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function recenterMap() { isUserMoving = false; if (lastPos) map.flyTo(lastPos, 18); }
+        map.on('movestart', () => isUserMoving = true);
     </script>
 </body>
 </html>
