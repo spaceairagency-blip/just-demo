@@ -3,173 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Uber Tracker Pro</title>
+    <title>Super Sensitive Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        :root { --uber-blue: #276EF1; --dark: #000; --green: #2ecc71; --red: #e74c3c; }
+        :root { --uber-blue: #276EF1; --dark: #000; --green: #28a745; --red: #dc3545; }
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Arial', sans-serif; background: #f4f4f4; }
 
         .dashboard {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 12px;
-            z-index: 1000; display: flex; flex-wrap: wrap; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            background: #fff; padding: 12px; border-radius: 12px;
+            z-index: 1000; display: flex; justify-content: space-around;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .stat-item { flex: 1; text-align: center; }
-        .stat-val { font-size: 18px; font-weight: bold; color: var(--dark); }
-        .stat-unit { font-size: 9px; color: #777; text-transform: uppercase; }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-val { font-size: 22px; font-weight: bold; color: var(--dark); }
+        .stat-unit { font-size: 10px; color: #666; font-weight: bold; text-transform: uppercase; }
 
-        #history-panel {
-            position: absolute; bottom: -300px; left: 0; right: 0; height: 250px;
-            background: white; z-index: 1001; transition: 0.5s;
-            border-radius: 20px 20px 0 0; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+        .status-card {
+            position: absolute; top: 85px; left: 50%; transform: translateX(-50%);
+            background: #fff; padding: 5px 15px; border-radius: 20px;
+            z-index: 1000; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 12px; font-weight: bold;
         }
-        #history-panel.active { bottom: 0; }
 
-        .controls { position: absolute; bottom: 30px; left: 20px; right: 20px; display: flex; justify-content: space-between; z-index: 1000; }
-        .btn { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 20px; }
-        .start-btn { background: var(--green); color: white; }
-        .stop-btn { background: var(--red); color: white; }
-        .history-btn { background: white; color: var(--uber-blue); }
-        
         #map { width: 100%; height: 100vh; z-index: 1; }
+        
+        .car-marker-icon { 
+            color: var(--dark); 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+
+        .clear-btn {
+            position: absolute; bottom: 30px; left: 20px;
+            background: #fff; border: none; padding: 12px; border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; color: var(--red);
+            width: 50px; height: 50px; cursor: pointer;
+        }
+        .recenter-btn {
+            position: absolute; bottom: 30px; right: 20px;
+            width: 50px; height: 50px; background: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
-        <div class="stat-item"><div id="speed" class="stat-val">0</div><div class="stat-unit">km/h</div></div>
-        <div class="stat-item"><div id="dist" class="stat-val">0.00</div><div class="stat-unit">Total km</div></div>
-        <div class="stat-item"><div id="weather" class="stat-val">--°C</div><div class="stat-unit">Temp</div></div>
-    </div>
-
-    <div id="map"></div>
-
-    <div id="history-panel">
-        <div style="display:flex; justify-content:space-between;">
-            <strong>Journey History</strong>
-            <button onclick="toggleHistory()" style="background:none; border:none; font-size:20px;">&times;</button>
+        <div class="stat-item">
+            <div id="speed-num" class="stat-val">0</div>
+            <div class="stat-unit">km/h</div>
         </div>
-        <p id="history-info">Loading saved data...</p>
-        <button id="replay-btn" class="btn" style="width:100%; border-radius:8px; background:var(--dark); color:white; font-size:14px; margin-top:10px;" onclick="replayJourney()">Watch Last Trip Replay</button>
-        <button class="btn" style="width:100%; border-radius:8px; background:var(--red); color:white; font-size:14px; margin-top:5px;" onclick="clearData()">Clear All Data</button>
+        <div class="stat-item">
+            <div id="dist-val" class="stat-val">0.000</div>
+            <div class="stat-unit">km total</div>
+        </div>
+        <div class="stat-item">
+            <div id="nana-dist" class="stat-val">--</div>
+            <div class="stat-unit">To Nana</div>
+        </div>
     </div>
 
-    <div class="controls">
-        <button id="main-btn" class="btn start-btn" onclick="toggleTracking()"><i class="fas fa-play"></i></button>
-        <button class="btn history-btn" onclick="toggleHistory()"><i class="fas fa-history"></i></button>
+    <div id="status-container" class="status-card">
+        <span id="status-dot" style="height:8px; width:8px; border-radius:50%; background:var(--red);"></span>
+        <span id="status-text">Stopped</span>
     </div>
+
+    <button class="clear-btn" onclick="clearJourney()"><i class="fas fa-trash-alt"></i></button>
+    <div id="map"></div>
+    <div class="recenter-btn" onclick="recenterMap()"><i class="fas fa-location-arrow" style="font-size: 20px; color: var(--uber-blue);"></i></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        const API_KEY = "8bc7e583c218683e33b93f18e5904031";
-        let map, carMarker, isTracking = false, isUserMovingMap = false;
-        let lastLatLng = null;
+        const speedDisplay = document.getElementById('speed-num');
+        const odometerDisplay = document.getElementById('dist-val');
+        const nanaDistDisplay = document.getElementById('nana-dist');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
 
-        // Load data from LocalStorage
-        let pathHistory = JSON.parse(localStorage.getItem('trip_path')) || [];
-        let totalDistance = parseFloat(localStorage.getItem('trip_dist')) || 0;
+        const nanaBariLoc = [23.95648, 90.26997]; 
+        
+        let totalDistance = parseFloat(localStorage.getItem('uber_dist')) || 0;
+        let lastLat, lastLon, carMarker, isUserMovingMap = false;
 
-        // 1. Initialize Map
-        map = L.map('map', { zoomControl: false }).setView([23.81, 90.41], 15);
+        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView(nanaBariLoc, 15);
+
         L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-            maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3']
+            maxZoom: 21, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
 
-        // 2. ALWAYS-ON Tracking for visibility
-        function initGPS() {
+        const flagIcon = L.divIcon({
+            className: 'nana-flag',
+            html: '<i class="fas fa-flag" style="font-size: 30px; color: #dc3545; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"></i>',
+            iconSize: [30, 30], iconAnchor: [5, 30]
+        });
+        L.marker(nanaBariLoc, { icon: flagIcon }).addTo(map).bindPopup("Nana Bari");
+
+        const carIcon = L.divIcon({
+            className: 'car-marker-icon',
+            html: '<i class="fas fa-car" style="font-size: 28px;"></i>',
+            iconSize: [28, 28], iconAnchor: [14, 14]
+        });
+
+        odometerDisplay.innerText = totalDistance.toFixed(3);
+
+        function startTracking() {
             if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(updateGPS, null, { enableHighAccuracy: true });
+                navigator.geolocation.watchPosition(updateStats, null, {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                });
             }
         }
 
-        function updateGPS(pos) {
-            const { latitude, longitude, speed, heading } = pos.coords;
-            const currentLoc = [latitude, longitude];
+        function updateStats(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
 
-            // Update car marker even if not recording
-            updateCarUI(currentLoc, heading || 0);
-            updateWeather(latitude, longitude);
-            
-            if (!isUserMovingMap) map.panTo(currentLoc);
+            const toNana = calculateDistance(lat, lon, nanaBariLoc[0], nanaBariLoc[1]);
+            nanaDistDisplay.innerText = toNana.toFixed(2) + " km";
 
-            // Record only if "Start" is pressed
-            if (isTracking) {
-                if (lastLatLng) {
-                    const d = map.distance(lastLatLng, currentLoc) / 1000;
-                    totalDistance += d;
-                    localStorage.setItem('trip_dist', totalDistance);
-                    
-                    // Draw Line
-                    L.polyline([lastLatLng, currentLoc], {color: '#276EF1', weight: 5}).addTo(map);
+            let stepDistance = 0;
+            if (lastLat && lastLon) {
+                stepDistance = calculateDistance(lastLat, lastLon, lat, lon);
+                
+                // Sensitivity: 0.1 feet
+                if (stepDistance > 0.00003) { 
+                    totalDistance += stepDistance;
+                    odometerDisplay.innerText = totalDistance.toFixed(3);
+                    localStorage.setItem('uber_dist', totalDistance);
+                    updateStatus(true);
+                } else {
+                    updateStatus(false);
                 }
-                pathHistory.push({loc: currentLoc, head: heading || 0});
-                localStorage.setItem('trip_path', JSON.stringify(pathHistory));
-                lastLatLng = currentLoc;
             }
-            
-            document.getElementById('speed').innerText = Math.round((speed || 0) * 3.6);
-            document.getElementById('dist').innerText = totalDistance.toFixed(2);
-        }
 
-        function updateCarUI(loc, rotation) {
-            const icon = L.divIcon({
-                className: 'car-icon',
-                html: `<i class="fas fa-car" style="font-size:25px; transform:rotate(${rotation}deg); color:black; text-shadow: 0 0 3px white;"></i>`,
-                iconSize: [30, 30], iconAnchor: [15, 15]
-            });
-            if (!carMarker) carMarker = L.marker(loc, {icon: icon}).addTo(map);
-            else carMarker.setLatLng(loc).setIcon(icon);
-        }
+            const newPos = [lat, lon];
+            let rawSpeed = position.coords.speed || 0;
+            let displaySpeed = rawSpeed > 0 ? Math.round(rawSpeed * 3.6) : (stepDistance > 0.0005 ? 2 : 0);
+            speedDisplay.innerText = displaySpeed;
 
-        function toggleTracking() {
-            const btn = document.getElementById('main-btn');
-            isTracking = !isTracking;
-            if (isTracking) {
-                btn.className = 'btn stop-btn';
-                btn.innerHTML = '<i class="fas fa-stop"></i>';
-                lastLatLng = carMarker ? carMarker.getLatLng() : null;
+            if (!carMarker) {
+                carMarker = L.marker(newPos, { icon: carIcon }).addTo(map);
+                map.panTo(newPos);
             } else {
-                btn.className = 'btn start-btn';
-                btn.innerHTML = '<i class="fas fa-play"></i>';
+                carMarker.setLatLng(newPos);
+            }
+
+            if (!isUserMovingMap) map.panTo(newPos);
+            lastLat = lat; lastLon = lon;
+        }
+
+        function updateStatus(isMoving) {
+            statusText.innerText = isMoving ? "Moving" : "Stopped";
+            statusDot.style.background = isMoving ? "var(--green)" : "var(--red)";
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function clearJourney() {
+            if(confirm("Reset odometer?")) {
+                localStorage.removeItem('uber_dist');
+                totalDistance = 0;
+                odometerDisplay.innerText = "0.000";
             }
         }
 
-        async function updateWeather(lat, lon) {
-            try {
-                const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
-                const data = await res.json();
-                document.getElementById('weather').innerText = Math.round(data.main.temp) + "°C";
-            } catch(e) {}
+        function recenterMap() { 
+            isUserMovingMap = false; 
+            if(carMarker) map.flyTo(carMarker.getLatLng(), 18); 
         }
 
-        function toggleHistory() {
-            document.getElementById('history-panel').classList.toggle('active');
-            document.getElementById('history-info').innerText = `Saved Trip: ${pathHistory.length} points logged.`;
-        }
-
-        function clearData() {
-            if(confirm("Delete all history?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        function replayJourney() {
-            if (pathHistory.length < 2) return alert("Not enough data to replay!");
-            toggleHistory();
-            let i = 0;
-            const interval = setInterval(() => {
-                if (i >= pathHistory.length) return clearInterval(interval);
-                updateCarUI(pathHistory[i].loc, pathHistory[i].head);
-                map.panTo(pathHistory[i].loc);
-                i++;
-            }, 100);
-        }
-
-        window.onload = initGPS;
-        map.on('movestart', () => isUserMovingMap = true);
+        window.onload = startTracking;
+        map.on('movestart', () => { isUserMovingMap = true; });
     </script>
 </body>
 </html>
