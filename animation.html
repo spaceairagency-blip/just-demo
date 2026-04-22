@@ -1,139 +1,83 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCSI Call System</title>
+    <title>NCSI Video Call Popup</title>
     <style>
-        :root {
-            --gold: #ffcc00;
-            --glass: rgba(255, 255, 255, 0.1);
-            --bg: #0f0f0f;
+        body { 
+            background: #0f0f0f; 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
         }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Glassmorphism Container */
-        .container {
-            background: var(--glass);
+        .dashboard {
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-            width: 350px;
-        }
-
-        h1 {
-            color: var(--gold);
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            background: transparent;
-            color: var(--gold);
-            border: 2px solid var(--gold);
-            padding: 12px 24px;
+            padding: 50px;
             border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            width: 100%;
-            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
-
-        .btn:hover {
-            background: var(--gold);
+        h1 { color: #ffcc00; letter-spacing: 2px; }
+        .trigger-btn {
+            background: #ffcc00;
             color: black;
-            box-shadow: 0 0 15px var(--gold);
+            border: none;
+            padding: 15px 40px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.3s;
         }
-
-        .status {
-            margin-top: 15px;
-            font-size: 0.8rem;
-        }
+        .trigger-btn:hover { box-shadow: 0 0 25px #ffcc00; transform: translateY(-2px); }
+        video { display: none; } /* Master video source */
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>NCSI Call System</h1>
-        <p>This tool triggers a system-level popup notification that appears over other windows.</p>
-        
-        <button class="btn" onclick="requestPermission()">Enable Notifications</button>
-        <button class="btn" onclick="simulateIncomingCall()">Test Incoming Call</button>
-        
-        <div id="status" class="status">Status: Waiting for permission...</div>
+    <div class="dashboard">
+        <h1>NCSI CALL ENGINE</h1>
+        <p>Click to launch the Video Popup on top of Chrome.</p>
+        <button class="trigger-btn" onclick="openVideoPopup()">FOUND CALL (VIDEO)</button>
     </div>
 
+    <video id="callVideo" loop crossorigin="anonymous">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+    </video>
+
     <script>
-        const statusDiv = document.getElementById('status');
+        async function openVideoPopup() {
+            const video = document.getElementById('callVideo');
+            
+            try {
+                // 1. Play the video hidden in the background
+                await video.play();
 
-        // 1. Request Permission from the user
-        function requestPermission() {
-            if (!("Notification" in window)) {
-                alert("This browser does not support desktop notifications.");
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    statusDiv.innerText = "Status: Ready to receive calls!";
-                    statusDiv.style.color = "#00ff00";
+                // 2. Trigger the "Picture-in-Picture" Mode
+                // This forces the video into a floating, native OS window 
+                // that stays on top of every other app on your Asus VivoBook.
+                if (document.pictureInPictureEnabled) {
+                    await video.requestPictureInPicture();
                 } else {
-                    statusDiv.innerText = "Status: Permission Denied.";
-                    statusDiv.style.color = "#ff4444";
+                    alert("Your browser does not support native video popups.");
                 }
-            });
-        }
 
-        // 2. Function to show the notification (The "Popup")
-        function simulateIncomingCall() {
-            if (Notification.permission === "granted") {
-                const options = {
-                    body: "Incoming Video Call from Lopa Yeasmin",
-                    icon: "https://cdn-icons-png.flaticon.com/512/3059/3059518.png", // Call icon
-                    silent: false,
-                    requireInteraction: true, // Keeps it on screen until user clicks it
-                    tag: "call-notify" // Prevents multiple popups from stacking
-                };
-
-                const notification = new Notification("NCSI CALL FOUND", options);
-
-                // When user clicks the notification
-                notification.onclick = function(event) {
-                    event.preventDefault();
-                    window.focus(); // Brings Chrome back to the front
-                    alert("Connecting to the call...");
-                    notification.close();
-                };
-
-            } else {
-                alert("Please click 'Enable Notifications' first, SIR.");
+            } catch (error) {
+                console.error(error);
+                alert("SIR, please click the button again to allow the video popup.");
             }
         }
+        
+        // Listen for when the popup is closed
+        video.addEventListener('leavepictureinpicture', () => {
+            video.pause();
+        });
     </script>
 </body>
 </html>
