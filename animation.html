@@ -1,159 +1,173 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Sub Counter - Rubi Zamangdx</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --neon-green:  #39ff9a;
-      --neon-blue:   #00c8ff;
-      --bg-deep:     #050810;
-      --bg-card:     rgba(10, 15, 30, 0.85);
-      --border-glow: rgba(57, 255, 154, 0.25);
-      --text-dim:    rgba(255,255,255,0.35);
-    }
-    html, body {
-      width: 100%; height: 100%;
-      background: var(--bg-deep);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; font-family: 'Space Mono', monospace;
-    }
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(57,255,154,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(57,255,154,0.03) 1px, transparent 1px);
-      background-size: 40px 40px; pointer-events: none;
-    }
-    .card {
-      position: relative; z-index: 10;
-      background: var(--bg-card); border: 1px solid var(--border-glow);
-      border-radius: 4px; padding: 50px 60px;
-      width: min(520px, 92vw); text-align: center;
-      backdrop-filter: blur(24px);
-      box-shadow: 0 0 60px rgba(57,255,154,0.06), 0 40px 80px rgba(0,0,0,0.7);
-    }
-    .card::before { content: ''; position: absolute; top: -1px; left: -1px; width: 18px; height: 18px; border-color: var(--neon-green); border-style: solid; border-width: 2px 0 0 2px; }
-    .card::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 18px; height: 18px; border-color: var(--neon-green); border-style: solid; border-width: 0 2px 2px 0; }
-    
-    .brand { font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 18px; }
-    .live-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,60,60,0.4); background: rgba(255,40,40,0.12); border-radius: 2px; padding: 5px 16px; font-size: 11px; font-weight: 700; color: #ff5f5f; margin-bottom: 28px; text-transform: uppercase; }
-    .live-dot { width: 6px; height: 6px; background: #ff3333; border-radius: 50%; box-shadow: 0 0 6px #ff3333; animation: blink 1.1s ease-in-out infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SADIK'S CHANNEL REMOVAL PARTY</title>
+    <style>
+        :root {
+            --primary: #ff4757;
+            --accent: #ffa502;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
 
-    #count {
-      font-family: 'Orbitron', monospace; font-size: 72px; font-weight: 900;
-      letter-spacing: -2px; line-height: 1; display: block;
-      color: var(--neon-green); text-shadow: 0 0 20px rgba(57,255,154,0.6);
-      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #count.bump { transform: scale(1.1); }
-    .count-label { font-size: 10px; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; margin-top: 10px; }
-    
-    #delta { display: inline-block; padding: 7px 20px; border-radius: 2px; font-size: 12px; font-weight: 700; margin: 25px 0; transition: all 0.3s ease; }
-    .neutral { background: rgba(255,255,255,0.05); color: var(--text-dim); }
-    .gain { background: rgba(57,255,154,0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
-    .error-text { color: #ff5f5f; font-size: 12px; margin-top: 10px; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-    .bar-wrap { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-    #pbar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-blue)); transform-origin: left; transform: scaleX(0); }
-  </style>
+        /* Glassmorphism Card */
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        /* The Stats / "Work" Logs */
+        .stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: left;
+        }
+
+        .stats p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .highlight { color: var(--accent); }
+
+        /* Party Button */
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        /* Confetti Canvas */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="brand">Nabhans Crafts Ideas</div>
-  <div class="live-badge"><div class="live-dot"></div>Live Updates</div>
-  
-  <div class="count-wrap">
-    <span id="count">000,000</span>
-    <div class="count-label">subscribers</div>
-  </div>
+    <canvas id="confetti"></canvas>
 
-  <div id="delta" class="neutral">Syncing with YouTube...</div>
-  
-  <div class="bar-wrap"><div id="pbar"></div></div>
-</div>
+    <div class="container">
+        <h1>🎉 Sadik's Channel Removal Party</h1>
+        <p class="subtitle">Celebrating the end of the "Copy-Paste" Era</p>
 
-<script>
-/* ── CONFIG ── */
-const CHANNEL_ID = 'UCV6XeVyyYqKettwhHXb7cbg';
-const REFRESH_RATE = 10000; // 10 seconds
-let prevCount = null;
+        <div class="stats">
+            <p>> [LOG]: Detecting original content... <span class="highlight">0% Found</span></p>
+            <p>> [LOG]: Right-click usage: <span class="highlight">OVERLOAD</span></p>
+            <p>> [LOG]: Status: <span style="color: #2ecc71;">Party Invitations Sent</span></p>
+        </div>
 
-/* ── CORE LOGIC ── */
-async function fetchSubscriberCount() {
-    // This API allows direct fetching without common 403 Forbidden errors
-    const url = `https://api.subscribercount.org/channel/${CHANNEL_ID}`;
+        <p>Warning: Uploading copied videos may result in more parties like this.</p>
+        <button onclick="startParty()">Click for Party Mode</button>
+    </div>
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        
-        if (data && data.subCount !== undefined) {
-            updateDisplay(parseInt(data.subCount));
-        } else {
-            throw new Error('Data format error');
+    <script>
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-    } catch (err) {
-        console.warn("API blocked or down. Switching to local simulation for UI check.");
-        // If the API fails, we use the last known count or a placeholder so the UI doesn't break
-        if(prevCount === null) updateDisplay(45210); 
-        document.getElementById('delta').innerText = "API Rate Limited - Retrying...";
-    }
-}
 
-function updateDisplay(currentCount) {
-    const countEl = document.getElementById('count');
-    const deltaEl = document.getElementById('delta');
+        window.addEventListener('resize', resize);
+        resize();
 
-    // Update Number
-    countEl.innerText = currentCount.toLocaleString();
-    
-    // Animation Bump
-    countEl.classList.add('bump');
-    setTimeout(() => countEl.classList.remove('bump'), 200);
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 10 + 5;
+                this.speed = Math.random() * 3 + 2;
+                this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                this.angle = Math.random() * 360;
+            }
 
-    // Calculate Change
-    if (prevCount !== null && currentCount > prevCount) {
-        deltaEl.innerText = `▲ +${currentCount - prevCount} GAINED`;
-        deltaEl.className = 'gain';
-    } else if (prevCount !== null && currentCount < prevCount) {
-        deltaEl.innerText = `▼ ${currentCount - prevCount} LOST`;
-        deltaEl.className = 'neutral';
-    } else {
-        deltaEl.innerText = "NO RECENT CHANGE";
-        deltaEl.className = 'neutral';
-    }
+            update() {
+                this.y += this.speed;
+                this.angle += 1;
+                if (this.y > canvas.height) this.y = -20;
+            }
 
-    prevCount = currentCount;
-    resetProgressBar();
-}
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
 
-function resetProgressBar() {
-    const pbar = document.getElementById('pbar');
-    pbar.style.transition = 'none';
-    pbar.style.transform = 'scaleX(1)';
-    
-    // Trigger reflow to restart animation
-    void pbar.offsetWidth; 
-    
-    pbar.style.transition = `transform ${REFRESH_RATE / 1000}s linear`;
-    pbar.style.transform = 'scaleX(0)';
-}
+        function startParty() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+            animate();
+        }
 
-/* ── INIT ── */
-fetchSubscriberCount();
-setInterval(fetchSubscriberCount, REFRESH_RATE);
-</script>
-
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+    </script>
 </body>
 </html>
