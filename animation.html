@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celebration Countdown</title>
+    <title>Celebratissson Countdown</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --gold: #ffd700; --bg: #1a0533; }
-        * { padding: 0; margin: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        * { padding: 0; margin: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: radial-gradient(circle at center, #2d1060 0%, var(--bg) 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; overflow: hidden; }
         #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         .star { position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px; animation: twinkle 3s infinite; }
@@ -17,64 +17,44 @@
         .box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 25px; border-radius: 15px; min-width: 100px; }
         .num { font-size: 3rem; font-weight: 800; display: block; color: var(--gold); }
         .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
-        .btn { padding: 18px 60px; font-size: 1.2rem; background: var(--gold); color: var(--bg); border: none; border-radius: 50px; cursor: pointer; font-weight: 900; transition: 0.4s; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); }
+        .btn { padding: 18px 60px; font-size: 1.2rem; background: var(--gold); color: var(--bg); border: none; border-radius: 50px; cursor: pointer; font-weight: 900; transition: 0.4s; }
         .btn:disabled { background: #333; color: #666; cursor: not-allowed; opacity: 0.5; }
         @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
     <div id="stars"></div>
-    <header><h1 id="eventTitle">Connecting...</h1></header>
-
+    <h1 id="eventTitle">Connecting...</h1>
     <div class="countdown-wrap">
         <div class="box"><span class="num" id="days">00</span><span class="label">Days</span></div>
         <div class="box"><span class="num" id="hours">00</span><span class="label">Hours</span></div>
         <div class="box"><span class="num" id="mins">00</span><span class="label">Mins</span></div>
         <div class="box"><span class="num" id="secs">00</span><span class="label">Secs</span></div>
     </div>
-
     <button class="btn" id="startBtn" onclick="window.location.href='home.html'" disabled>Start Celebration</button>
 
     <script>
         const SUPABASE_URL = 'https://gevhkmpynlwhxohvsszw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_ncMPyJTKROsVGV0Afbg66w_ofZVT1U7';
-        
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let targetDate = null;
 
-        // Background Stars
+        // Star generation
         const starContainer = document.getElementById('stars');
         for(let i=0; i<80; i++) {
             const s = document.createElement('div');
             s.className = 'star';
             s.style.left = Math.random() * 100 + '%';
             s.style.top = Math.random() * 100 + '%';
-            s.style.animationDelay = Math.random() * 3 + 's';
             starContainer.appendChild(s);
         }
 
         async function init() {
-            // Fetch initial data
-            const { data, error } = await _supabase
-                .from('celebration_config')
-                .select('*')
-                .eq('id', 1)
-                .single();
-
-            if (data) {
-                applyData(data);
-            } else {
-                document.getElementById('eventTitle').innerText = "Update Admin Panel";
-            }
-
-            // Listen for Realtime updates
-            _supabase
-                .channel('public:celebration_config')
-                .on('postgres_changes', 
-                    { event: 'UPDATE', schema: 'public', table: 'celebration_config', filter: 'id=eq.1' }, 
-                    (payload) => applyData(payload.new)
-                )
-                .subscribe();
+            const { data } = await _supabase.from('celebration_config').select('*').eq('id', 1).single();
+            if (data) { applyData(data); }
+            _supabase.channel('public:celebration_config').on('postgres_changes', 
+                { event: 'UPDATE', schema: 'public', table: 'celebration_config', filter: 'id=eq.1' }, 
+                (payload) => applyData(payload.new)).subscribe();
         }
 
         function applyData(data) {
@@ -86,13 +66,11 @@
             if (!targetDate) return;
             const diff = targetDate - new Date();
             const btn = document.getElementById('startBtn');
-
             if (diff <= 0) {
                 btn.disabled = false;
                 document.querySelectorAll('.num').forEach(n => n.innerText = "00");
                 return;
             }
-
             btn.disabled = true;
             document.getElementById('days').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
             document.getElementById('hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
