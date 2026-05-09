@@ -1,70 +1,107 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown</title>
+    <title>Celebration Countdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #1a0533; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        h1 { font-size: 3rem; margin-bottom: 20px; color: #ffd700; }
-        .timer { display: flex; gap: 20px; }
-        .box { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; min-width: 80px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
-        .num { font-size: 2.5rem; font-weight: bold; display: block; }
-        .label { font-size: 0.8rem; opacity: 0.7; text-transform: uppercase; }
-        .btn { margin-top: 40px; padding: 15px 40px; background: #ffd700; color: #1a0533; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        :root { --gold: #ffd700; --bg: #1a0533; }
+        * { padding: 0; margin: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: radial-gradient(circle at center, #2d1060 0%, var(--bg) 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; overflow: hidden; }
+        #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .star { position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px; animation: twinkle 3s infinite; }
+        h1 { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        .countdown-wrap { display: flex; gap: 15px; margin: 40px 0; }
+        .box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 25px; border-radius: 15px; min-width: 100px; }
+        .num { font-size: 3rem; font-weight: 800; display: block; color: var(--gold); }
+        .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; }
+        .btn { padding: 18px 60px; font-size: 1.2rem; background: var(--gold); color: var(--bg); border: none; border-radius: 50px; cursor: pointer; font-weight: 900; transition: 0.4s; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; opacity: 0.5; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
+    <div id="stars"></div>
+    <header><h1 id="eventTitle">Connecting...</h1></header>
 
-    <h1 id="eventTitle">Loading...</h1>
-
-    <div class="timer">
-        <div class="box"><span class="num" id="d">00</span><span class="label">Days</span></div>
-        <div class="box"><span class="num" id="h">00</span><span class="label">Hours</span></div>
-        <div class="box"><span class="num" id="m">00</span><span class="label">Mins</span></div>
-        <div class="box"><span class="num" id="s">00</span><span class="label">Secs</span></div>
+    <div class="countdown-wrap">
+        <div class="box"><span class="num" id="days">00</span><span class="label">Days</span></div>
+        <div class="box"><span class="num" id="hours">00</span><span class="label">Hours</span></div>
+        <div class="box"><span class="num" id="mins">00</span><span class="label">Mins</span></div>
+        <div class="box"><span class="num" id="secs">00</span><span class="label">Secs</span></div>
     </div>
 
     <button class="btn" id="startBtn" onclick="window.location.href='home.html'" disabled>Start Celebration</button>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+    <script>
+        const SUPABASE_URL = 'https://gevhkmpynlwhxohvsszw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ncMPyJTKROsVGV0Afbg66w_ofZVT1U7';
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let targetDate = null;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCHj7I-hjgLzjn_6Q990SjwIY6oAoJa-lI",
-            authDomain: "rent-management-system-224df.firebaseapp.com",
-            projectId: "rent-management-system-224df",
-            databaseURL: "https://rent-management-system-224df-default-rtdb.firebaseio.com/",
-            appId: "1:1077553959193:web:3b72cddee4e561ba3df588"
-        };
+        // Background Stars
+        const starContainer = document.getElementById('stars');
+        for(let i=0; i<80; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.top = Math.random() * 100 + '%';
+            s.style.animationDelay = Math.random() * 3 + 's';
+            starContainer.appendChild(s);
+        }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        let targetDate = new Date();
+        async function init() {
+            // Fetch initial data
+            const { data, error } = await _supabase
+                .from('celebration_config')
+                .select('*')
+                .eq('id', 1)
+                .single();
 
-        onValue(ref(db, 'celebration'), (snapshot) => {
-            const data = snapshot.val();
-            if(data) {
-                targetDate = new Date(data.date);
-                document.getElementById('eventTitle').innerText = data.name;
+            if (data) {
+                applyData(data);
+            } else {
+                document.getElementById('eventTitle').innerText = "Update Admin Panel";
             }
-        });
 
-        function update() {
+            // Listen for Realtime updates
+            _supabase
+                .channel('public:celebration_config')
+                .on('postgres_changes', 
+                    { event: 'UPDATE', schema: 'public', table: 'celebration_config', filter: 'id=eq.1' }, 
+                    (payload) => applyData(payload.new)
+                )
+                .subscribe();
+        }
+
+        function applyData(data) {
+            targetDate = new Date(data.target_date);
+            document.getElementById('eventTitle').innerText = data.event_name;
+        }
+
+        function updateTimer() {
+            if (!targetDate) return;
             const diff = targetDate - new Date();
             const btn = document.getElementById('startBtn');
-            if(diff <= 0) {
+
+            if (diff <= 0) {
                 btn.disabled = false;
+                document.querySelectorAll('.num').forEach(n => n.innerText = "00");
                 return;
             }
-            document.getElementById('d').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
-            document.getElementById('h').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
-            document.getElementById('m').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            document.getElementById('s').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+
+            btn.disabled = true;
+            document.getElementById('days').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
+            document.getElementById('hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
+            document.getElementById('mins').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            document.getElementById('secs').innerText = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
         }
-        setInterval(update, 1000);
+
+        init();
+        setInterval(updateTimer, 1000);
     </script>
 </body>
 </html>
