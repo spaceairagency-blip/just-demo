@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eid-Ul-Adha Celebration</title>
+    <title>Celebration Countdown</title>
     <style>
         * {
             padding: 0;
@@ -13,479 +13,253 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a0533 0%, #4a148c 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            color: white;
             overflow-x: hidden;
+            text-align: center;
         }
 
         header {
-            text-align: center;
-            padding: 40px 20px;
-            animation: slideDown 0.8s ease-out;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
         }
 
         header h1 {
-            color: white;
-            font-size: 48px;
+            font-size: 56px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-weight: 700;
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 18px;
-            font-weight: 300;
-            letter-spacing: 2px;
+            font-size: 20px;
+            color: rgba(255,255,255,0.7);
         }
 
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            padding: 40px 20px;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        .button-group {
+        /* Countdown UI */
+        .countdown-boxes {
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
-            animation: fadeIn 1.2s ease-out 0.3s both;
-        }
-
-        .start-btn {
-            padding: 16px 48px;
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .start-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(245, 87, 108, 0.6);
-        }
-
-        .start-btn:active:not(:disabled) {
-            transform: translateY(-1px);
-        }
-
-        .start-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .info-btn {
-            padding: 16px 48px;
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            backdrop-filter: blur(10px);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .info-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
-        }
-
-        .admin-btn {
-            padding: 10px 20px;
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 10px;
-        }
-
-        .admin-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .decorative-elements {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .star {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes twinkle {
-            0%, 100% {
-                opacity: 0.3;
-            }
-            50% {
-                opacity: 1;
-            }
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-        }
-
-        .countdown-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            animation: fadeIn 1s ease-out 0.5s both;
-            width: 100%;
-        }
-
-        .countdown-label {
-            color: rgba(255,255,255,0.55);
-            font-size: 12px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .countdown-boxes {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
+            margin: 30px 0;
         }
 
         .cd-box {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
         }
 
         .cd-value {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            border-radius: 14px;
-            width: 72px;
-            height: 72px;
+            border-radius: 15px;
+            width: 100px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 700;
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
-            transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .cd-value::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 50%;
-            background: rgba(255,255,255,0.04);
-            border-radius: 14px 14px 0 0;
+            transition: transform 0.3s ease;
         }
 
         .cd-value.tick {
             transform: scale(1.1);
+            border-color: #ffd700;
             color: #ffd700;
-            border-color: rgba(255,215,0,0.5);
-            box-shadow: 0 0 24px rgba(255,215,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
-        .cd-unit {
-            font-size: 10px;
-            letter-spacing: 2px;
+        .cd-label {
+            font-size: 14px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
-            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
         }
 
-        .cd-separator {
-            font-size: 28px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.3);
-            padding-bottom: 18px;
-            line-height: 1;
+        .start-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            background: #ffd700;
+            color: #1a0533;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .eid-started-msg {
-            font-size: 16px;
-            letter-spacing: 2px;
+            font-size: 24px;
             color: #ffd700;
-            font-family: 'Segoe UI', sans-serif;
-            text-shadow: 0 0 20px rgba(255,215,0,0.6);
-            animation: pulseGold 1.5s ease-in-out infinite;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
         }
 
-        @keyframes pulseGold {
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: currentColor;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-            margin-left: 5px;
+        #stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
         }
 
-        @keyframes pulse {
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            width: 2px;
+            height: 2px;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
             0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
-        }
-
-        .celebration-title {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-            margin-top: 10px;
-            font-style: italic;
-        }
-
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 36px;
-            }
-
-            .subtitle {
-                font-size: 14px;
-            }
-
-            .button-group {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .start-btn,
-            .info-btn {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .cd-value { 
-                width: 56px; 
-                height: 56px; 
-                font-size: 24px; 
-                border-radius: 10px; 
-            }
-
-            .cd-separator { 
-                font-size: 20px; 
-            }
-
-            .countdown-boxes { 
-                gap: 6px; 
-            }
         }
     </style>
 </head>
 <body>
-    <div class="decorative-elements" id="stars"></div>
+    <div id="stars"></div>
 
     <header>
-        <h1>🌙 <span id="headerTitle">Eid Ul Adha</span> 🌙</h1>
-        <p class="subtitle">Celebration of Sacrifice & Joy</p>
+        <h1 id="mainTitle">Celebration</h1>
+        <p class="subtitle">Join us for the big moment</p>
     </header>
 
-    <div class="container">
-        <div class="button-group">
-            <button class="start-btn" id="startBtn" onclick="startCelebration()" disabled>Start Celebration</button>
-            <button class="info-btn" onclick="showInfo()">Learn More</button>
+    <div class="countdown-boxes" id="countdownWrap">
+        <div class="cd-box">
+            <div class="cd-value" id="days">00</div>
+            <div class="cd-label">Days</div>
         </div>
-
-        <div class="countdown-wrap" id="countdownWrap">
-            <div class="countdown-label">Loading celebration time<span class="loading-spinner"></span></div>
+        <div class="cd-box">
+            <div class="cd-value" id="hours">00</div>
+            <div class="cd-label">Hours</div>
         </div>
-
-        <a href="admin.html" class="admin-btn">⚙️ Admin Panel</a>
+        <div class="cd-box">
+            <div class="cd-value" id="mins">00</div>
+            <div class="cd-label">Mins</div>
+        </div>
+        <div class="cd-box">
+            <div class="cd-value" id="secs">00</div>
+            <div class="cd-label">Secs</div>
+        </div>
     </div>
 
-    <footer>
-        <p>Wishing you a blessed Eid filled with joy and happiness! 🎉</p>
-    </footer>
+    <div id="statusArea"></div>
 
-   <script>
-    // Generate twinkling stars
-    const starsContainer = document.getElementById('stars');
-    for (let i = 0; i < 50; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 3 + 's';
-        starsContainer.appendChild(star);
-    }
+    <button class="start-btn" id="startBtn" onclick="startCelebration()" disabled>
+        Start Celebration
+    </button>
 
-    // ── CONFIGURATION ──
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbx6F_GoNGTGysXVf08jBkhVoCTUvH3Q3ruWJiwjCWuNv5tv23OIaBUgABOhkxyKJGx-/exec";
-    // Fallback date in case the script fails to load
-    let EID_DATE = new Date(2026, 4, 27, 20, 30, 0); 
+    <script>
+        // --- STAR BACKGROUND ---
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
 
-    // ── Inject countdown styles ──
-    const style = document.createElement('style');
-    style.textContent = `
-        .container { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 32px !important; }
-        .button-group { flex-direction: row !important; flex-wrap: wrap; }
-        .countdown-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeIn 1s ease-out 0.5s both; width: 100%; }
-        .countdown-label { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
-        .countdown-boxes { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        .cd-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .cd-value { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(10px); border-radius: 14px; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #fff; position: relative; }
-        .cd-value.tick { transform: scale(1.1); color: #ffd700; border-color: rgba(255,215,0,0.5); }
-        .cd-unit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
-        .cd-separator { font-size: 28px; font-weight: 700; color: rgba(255,255,255,0.3); padding-bottom: 18px; }
-        .eid-started-msg { font-size: 16px; letter-spacing: 2px; color: #ffd700; animation: pulseGold 1.5s infinite; }
-        @keyframes pulseGold { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        .start-btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; }
-    `;
-    document.head.appendChild(style);
+        // --- DYNAMIC DATA CONFIG ---
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzr0PrJtnh2BvMV5SG4_q8p-QTmmomH0WB3TiJh8rEivTQpYgCZZ3Dt5jecHDafuQK2/exec";
+        let targetDate = new Date(2026, 4, 27, 20, 30, 0); // Default fallback
 
-    // ── Build UI ──
-    const btn = document.querySelector('.start-btn');
-    const container = document.querySelector('.container');
-    const countdownWrap = document.createElement('div');
-    countdownWrap.className = 'countdown-wrap';
-    countdownWrap.innerHTML = `
-        <div class="countdown-label">Celebration begins in</div>
-        <div class="countdown-boxes">
-            <div class="cd-box"><div class="cd-value" id="cd-days">00</div><div class="cd-unit">Days</div></div>
-            <div class="cd-separator">:</div>
-            <div class="cd-box"><div class="cd-value" id="cd-hours">00</div><div class="cd-unit">Hours</div></div>
-            <div class="cd-separator">:</div>
-            <div class="cd-box"><div class="cd-value" id="cd-mins">00</div><div class="cd-unit">Mins</div></div>
-            <div class="cd-separator">:</div>
-            <div class="cd-box"><div class="cd-value" id="cd-secs">00</div><div class="cd-unit">Secs</div></div>
-        </div>
-    `;
-    container.appendChild(countdownWrap);
-
-    const elDays = document.getElementById('cd-days'), elHours = document.getElementById('cd-hours'), elMins = document.getElementById('cd-mins'), elSecs = document.getElementById('cd-secs');
-    let prevSecs = -1;
-
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function flashTick(el) { el.classList.add('tick'); setTimeout(() => el.classList.remove('tick'), 300); }
-
-    // ── Fetch dynamic date from Google Sheets ──
-    async function syncDate() {
-        try {
-            // Adding a timestamp to prevent browser caching
-            const response = await fetch(`${GAS_URL}?action=getTargetDate&t=${Date.now()}`);
-            const data = await response.json();
-            if (data.date) {
-                EID_DATE = new Date(data.date);
-                console.log("Date synced from Admin:", EID_DATE);
+        async function syncFromAdmin() {
+            try {
+                // Adding timestamp to URL to bypass browser cache
+                const response = await fetch(`${GAS_URL}?action=getTargetDate&t=${Date.now()}`);
+                const data = await response.json();
+                
+                if (data.date) {
+                    targetDate = new Date(data.date);
+                    if (data.name) document.getElementById('mainTitle').innerText = data.name;
+                    updateTimer(); // Initial update
+                }
+            } catch (e) {
+                console.error("Connection to Admin failed, using fallback.");
             }
-        } catch (e) {
-            console.error("Connection to Admin Panel failed, using fallback.");
-        }
-    }
-
-    function updateState() {
-        const now = new Date();
-        const diff = EID_DATE - now;
-
-        if (diff <= 0) {
-            btn.disabled = false;
-            countdownWrap.innerHTML = `<div class="eid-started-msg">🌙 Eid Mubarak! The celebration has begun! 🎉</div>`;
-            return;
         }
 
-        btn.disabled = true;
-        const days = Math.floor(diff / 86400000), hours = Math.floor((diff % 86400000) / 3600000), minutes = Math.floor((diff % 3600000) / 60000), seconds = Math.floor((diff % 60000) / 1000);
-
-        elDays.textContent = pad(days); elHours.textContent = pad(hours); elMins.textContent = pad(minutes); elSecs.textContent = pad(seconds);
-
-        if (seconds !== prevSecs) {
-            flashTick(elSecs);
-            if (seconds === 59) flashTick(elMins);
-            prevSecs = seconds;
+        function pad(n) { return String(n).padStart(2, '0'); }
+        
+        function flashEffect(id) {
+            const el = document.getElementById(id);
+            el.classList.add('tick');
+            setTimeout(() => el.classList.remove('tick'), 300);
         }
-    }
 
-    // Initialize
-    syncDate().then(() => {
-        updateState();
-        setInterval(updateState, 1000);
-    });
+        let lastSec = -1;
 
-    // Optional: Sync with sheet every 5 minutes to catch updates without refresh
-    setInterval(syncDate, 300000);
+        function updateTimer() {
+            const now = new Date();
+            const diff = targetDate - now;
+            const btn = document.getElementById('startBtn');
+            const wrap = document.getElementById('countdownWrap');
+            const status = document.getElementById('statusArea');
 
-    function startCelebration() {
-        if (new Date() < EID_DATE) return;
-        window.location.href = "home.html";
-    }
-</script>
+            if (diff <= 0) {
+                wrap.style.display = 'none';
+                status.innerHTML = `<div class="eid-started-msg">✨ The Celebration has Begun! ✨</div>`;
+                btn.disabled = false;
+                return;
+            }
+
+            btn.disabled = true;
+            
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('days').innerText = pad(d);
+            document.getElementById('hours').innerText = pad(h);
+            document.getElementById('mins').innerText = pad(m);
+            document.getElementById('secs').innerText = pad(s);
+
+            if (s !== lastSec) {
+                flashEffect('secs');
+                if (s === 59) flashEffect('mins');
+                lastSec = s;
+            }
+        }
+
+        function startCelebration() {
+            window.location.href = "home.html";
+        }
+
+        // Initialize
+        syncFromAdmin();
+        setInterval(updateTimer, 1000);
+        // Re-sync with server every 2 minutes in case Admin changes data
+        setInterval(syncFromAdmin, 120000);
+    </script>
 </body>
 </html>
