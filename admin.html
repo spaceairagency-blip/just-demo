@@ -1,101 +1,178 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Firebase Control</title>
+    <title>Admin Panel - Supabase Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root { --gold: #ffd700; --bg: #1a0533; --card: rgba(255, 255, 255, 0.1); }
         * { padding: 0; margin: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .admin-container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 500px; width: 100%; padding: 40px; }
-        h1 { color: #333; text-align: center; margin-bottom: 20px; }
+
+        body {
+            background: radial-gradient(circle at center, #2d1060 0%, var(--bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .admin-card {
+            background: var(--card);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        h1 { text-align: center; color: var(--gold); margin-bottom: 30px; font-size: 24px; }
+
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; }
-        input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
-        button { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .login-view { display: block; }
-        .admin-view { display: none; }
-        .current-data { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid #ddd; }
+        label { display: block; font-size: 14px; margin-bottom: 8px; opacity: 0.8; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--gold); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: var(--gold);
+            color: var(--bg);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); }
+        button:active { transform: translateY(0); }
+
+        #loginSection { display: block; }
+        #dashSection { display: none; }
+
+        .status { margin-top: 15px; text-align: center; font-size: 14px; }
+        .success { color: #4caf50; }
+        .error { color: #ff5252; }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div id="loginView" class="login-view">
+
+    <div class="admin-card">
+        <div id="loginSection">
             <h1>🔐 Admin Login</h1>
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="adminPass" placeholder="Default: Eid@2026">
+                <input type="password" id="adminPass" placeholder="Enter Admin Password">
             </div>
             <button onclick="checkLogin()">Login</button>
         </div>
 
-        <div id="adminView" class="admin-view">
-            <h1>⚙️ Manage Celebration</h1>
-            <div class="current-data">
-                <p>Current Title: <b id="currTitle">...</b></p>
-                <p>Current Time: <b id="currTime">...</b></p>
+        <div id="dashSection">
+            <h1>⚙️ Update Countdown</h1>
+            <div class="form-group">
+                <label>Celebration Name</label>
+                <input type="text" id="eventName" placeholder="e.g. Eid Ul Adha">
             </div>
             <div class="form-group">
-                <label>New Name</label>
-                <input type="text" id="newName" placeholder="e.g. Eid Ul Adha">
+                <label>Target Date & Time</label>
+                <input type="datetime-local" id="eventDate">
             </div>
-            <div class="form-group">
-                <label>New Date & Time</label>
-                <input type="datetime-local" id="newTime">
-            </div>
-            <button onclick="saveToFirebase()">Update Celebration</button>
-            <button style="background: #f0f0f0; color: #333;" onclick="location.reload()">Logout</button>
+            <button id="saveBtn" onclick="updateSupabase()">Update Website</button>
+            <p id="msg" class="status"></p>
+            <button style="background:none; color:white; margin-top:20px; font-weight:normal; font-size:12px; opacity:0.5" onclick="location.reload()">Logout</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+    <script>
+        // Supabase Credentials
+        const SUPABASE_URL = 'https://gevhkmpynlwhxohvsszw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ncMPyJTKROsVGV0Afbg66w_ofZVT1U7';
+        
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCHj7I-hjgLzjn_6Q990SjwIY6oAoJa-lI",
-            authDomain: "rent-management-system-224df.firebaseapp.com",
-            projectId: "rent-management-system-224df",
-            databaseURL: "https://rent-management-system-224df-default-rtdb.firebaseio.com/", // Updated to use RTDB
-            storageBucket: "rent-management-system-224df.firebasestorage.app",
-            messagingSenderId: "1077553959193",
-            appId: "1:1077553959193:web:3b72cddee4e561ba3df588"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Login Logic
-        window.checkLogin = function() {
+        // Login Check
+        function checkLogin() {
             const pass = document.getElementById('adminPass').value;
-            if(pass === "Eid@2026") {
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('adminView').style.display = 'block';
-                loadData();
-            } else { alert("Wrong Password!"); }
+            if (pass === "Eid@2026") {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashSection').style.display = 'block';
+                loadCurrentData();
+            } else {
+                alert("Access Denied: Incorrect Password");
+            }
         }
 
-        // Load Data
-        function loadData() {
-            onValue(ref(db, 'celebration'), (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    document.getElementById('currTitle').innerText = data.name;
-                    document.getElementById('currTime').innerText = new Date(data.date).toLocaleString();
+        // Fetch current values to fill the inputs
+        async function loadCurrentData() {
+            const { data, error } = await _supabase
+                .from('celebration_config')
+                .select('*')
+                .eq('id', 1)
+                .single();
+
+            if (data) {
+                document.getElementById('eventName').value = data.event_name;
+                // Formats date for datetime-local input
+                if (data.target_date) {
+                    const d = new Date(data.target_date);
+                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    document.getElementById('eventDate').value = d.toISOString().slice(0, 16);
                 }
-            });
+            }
         }
 
-        // Save Data
-        window.saveToFirebase = function() {
-            const name = document.getElementById('newName').value;
-            const time = document.getElementById('newTime').value;
-            if(!name || !time) return alert("Fill all fields");
+        // Update Database
+        async function updateSupabase() {
+            const name = document.getElementById('eventName').value;
+            const date = document.getElementById('eventDate').value;
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('saveBtn');
 
-            set(ref(db, 'celebration'), {
-                name: name,
-                date: time
-            }).then(() => alert("Saved Successfully!"));
+            if (!name || !date) {
+                msg.innerText = "Please fill all fields";
+                msg.className = "status error";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            const { data, error } = await _supabase
+                .from('celebration_config')
+                .update({ 
+                    event_name: name, 
+                    target_date: new Date(date).toISOString() 
+                })
+                .eq('id', 1);
+
+            btn.disabled = false;
+            btn.innerText = "Update Website";
+
+            if (error) {
+                msg.innerText = "Error: " + error.message;
+                msg.className = "status error";
+            } else {
+                msg.innerText = "Successfully synced with Live Site!";
+                msg.className = "status success";
+                setTimeout(() => { msg.innerText = ""; }, 3000);
+            }
         }
     </script>
 </body>
