@@ -375,196 +375,117 @@
         <p>Wishing you a blessed Eid filled with joy and happiness! 🎉</p>
     </footer>
 
-    <script>
-        // ════════════════════════════════════════════════════════════════
-        // CONFIGURATION - GAS DEPLOYMENT URL
-        // ════════════════════════════════════════════════════════════════
-        
-        const GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbzr0PrJtnh2BvMV5SG4_q8p-QTmmomH0WB3TiJh8rEivTQpYgCZZ3Dt5jecHDafuQK2/exec';
-        
-        let EID_DATE = null;
-        let CELEBRATION_NAME = 'Eid Ul Adha';
+   <script>
+    // Generate twinkling stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+    }
 
-        // ════════════════════════════════════════════════════════════════
-        // INITIALIZE
-        // ════════════════════════════════════════════════════════════════
+    // ── CONFIGURATION ──
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbx6F_GoNGTGysXVf08jBkhVoCTUvH3Q3ruWJiwjCWuNv5tv23OIaBUgABOhkxyKJGx-/exec";
+    // Fallback date in case the script fails to load
+    let EID_DATE = new Date(2026, 4, 27, 20, 30, 0); 
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            generateStars();
-            await loadCelebrationData();
-            updateState();
-            setInterval(updateState, 1000);
-        });
+    // ── Inject countdown styles ──
+    const style = document.createElement('style');
+    style.textContent = `
+        .container { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 32px !important; }
+        .button-group { flex-direction: row !important; flex-wrap: wrap; }
+        .countdown-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeIn 1s ease-out 0.5s both; width: 100%; }
+        .countdown-label { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+        .countdown-boxes { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .cd-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .cd-value { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(10px); border-radius: 14px; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #fff; position: relative; }
+        .cd-value.tick { transform: scale(1.1); color: #ffd700; border-color: rgba(255,215,0,0.5); }
+        .cd-unit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+        .cd-separator { font-size: 28px; font-weight: 700; color: rgba(255,255,255,0.3); padding-bottom: 18px; }
+        .eid-started-msg { font-size: 16px; letter-spacing: 2px; color: #ffd700; animation: pulseGold 1.5s infinite; }
+        @keyframes pulseGold { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .start-btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; }
+    `;
+    document.head.appendChild(style);
 
-        // ════════════════════════════════════════════════════════════════
-        // LOAD CELEBRATION DATA FROM GAS
-        // ════════════════════════════════════════════════════════════════
+    // ── Build UI ──
+    const btn = document.querySelector('.start-btn');
+    const container = document.querySelector('.container');
+    const countdownWrap = document.createElement('div');
+    countdownWrap.className = 'countdown-wrap';
+    countdownWrap.innerHTML = `
+        <div class="countdown-label">Celebration begins in</div>
+        <div class="countdown-boxes">
+            <div class="cd-box"><div class="cd-value" id="cd-days">00</div><div class="cd-unit">Days</div></div>
+            <div class="cd-separator">:</div>
+            <div class="cd-box"><div class="cd-value" id="cd-hours">00</div><div class="cd-unit">Hours</div></div>
+            <div class="cd-separator">:</div>
+            <div class="cd-box"><div class="cd-value" id="cd-mins">00</div><div class="cd-unit">Mins</div></div>
+            <div class="cd-separator">:</div>
+            <div class="cd-box"><div class="cd-value" id="cd-secs">00</div><div class="cd-unit">Secs</div></div>
+        </div>
+    `;
+    container.appendChild(countdownWrap);
 
-        async function loadCelebrationData() {
-            try {
-                if (GAS_DEPLOYMENT_URL.includes('YOUR_DEPLOYMENT_ID')) {
-                    // Use fallback/default data
-                    EID_DATE = new Date(2026, 4, 27, 20, 30, 0);
-                    CELEBRATION_NAME = 'Eid Ul Adha';
-                    console.warn('GAS URL not configured, using default date');
-                    return;
-                }
+    const elDays = document.getElementById('cd-days'), elHours = document.getElementById('cd-hours'), elMins = document.getElementById('cd-mins'), elSecs = document.getElementById('cd-secs');
+    let prevSecs = -1;
 
-                const url = new URL(GAS_DEPLOYMENT_URL);
-                url.searchParams.append('action', 'getCelebration');
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function flashTick(el) { el.classList.add('tick'); setTimeout(() => el.classList.remove('tick'), 300); }
 
-                const response = await fetch(url.toString(), {
-                    method: 'GET'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data.success && data.eidDate) {
-                    EID_DATE = new Date(data.eidDate);
-                    CELEBRATION_NAME = data.celebrationName || 'Eid Ul Adha';
-                    
-                    // Update header
-                    document.getElementById('headerTitle').textContent = CELEBRATION_NAME;
-                    
-                    console.log('Loaded celebration:', {
-                        date: EID_DATE,
-                        name: CELEBRATION_NAME
-                    });
-                } else {
-                    throw new Error('Invalid response from server');
-                }
-            } catch (error) {
-                console.error('Failed to load celebration data:', error);
-                // Use default fallback
-                EID_DATE = new Date(2026, 4, 27, 20, 30, 0);
-                CELEBRATION_NAME = 'Eid Ul Adha';
+    // ── Fetch dynamic date from Google Sheets ──
+    async function syncDate() {
+        try {
+            // Adding a timestamp to prevent browser caching
+            const response = await fetch(`${GAS_URL}?action=getTargetDate&t=${Date.now()}`);
+            const data = await response.json();
+            if (data.date) {
+                EID_DATE = new Date(data.date);
+                console.log("Date synced from Admin:", EID_DATE);
             }
+        } catch (e) {
+            console.error("Connection to Admin Panel failed, using fallback.");
+        }
+    }
+
+    function updateState() {
+        const now = new Date();
+        const diff = EID_DATE - now;
+
+        if (diff <= 0) {
+            btn.disabled = false;
+            countdownWrap.innerHTML = `<div class="eid-started-msg">🌙 Eid Mubarak! The celebration has begun! 🎉</div>`;
+            return;
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // COUNTDOWN LOGIC
-        // ════════════════════════════════════════════════════════════════
+        btn.disabled = true;
+        const days = Math.floor(diff / 86400000), hours = Math.floor((diff % 86400000) / 3600000), minutes = Math.floor((diff % 3600000) / 60000), seconds = Math.floor((diff % 60000) / 1000);
 
-        function generateStars() {
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 50; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                starsContainer.appendChild(star);
-            }
+        elDays.textContent = pad(days); elHours.textContent = pad(hours); elMins.textContent = pad(minutes); elSecs.textContent = pad(seconds);
+
+        if (seconds !== prevSecs) {
+            flashTick(elSecs);
+            if (seconds === 59) flashTick(elMins);
+            prevSecs = seconds;
         }
+    }
 
-        function pad(n) {
-            return String(n).padStart(2, '0');
-        }
+    // Initialize
+    syncDate().then(() => {
+        updateState();
+        setInterval(updateState, 1000);
+    });
 
-        function flashTick(el) {
-            el.classList.add('tick');
-            setTimeout(() => el.classList.remove('tick'), 300);
-        }
+    // Optional: Sync with sheet every 5 minutes to catch updates without refresh
+    setInterval(syncDate, 300000);
 
-        let prevSecs = -1;
-
-        function updateState() {
-            if (!EID_DATE) return;
-
-            const now = new Date();
-            const diff = EID_DATE - now;
-            const countdownWrap = document.getElementById('countdownWrap');
-            const startBtn = document.getElementById('startBtn');
-
-            if (diff <= 0) {
-                // Celebration has started
-                startBtn.disabled = false;
-                countdownWrap.innerHTML = `
-                    <div class="eid-started-msg">
-                        🌙 ${CELEBRATION_NAME} has begun! 🎉
-                    </div>
-                    <div class="celebration-title">May blessings flow to you and your loved ones</div>
-                `;
-                return;
-            }
-
-            // Celebration hasn't started yet
-            startBtn.disabled = true;
-
-            const days = Math.floor(diff / 86400000);
-            const hours = Math.floor((diff % 86400000) / 3600000);
-            const minutes = Math.floor((diff % 3600000) / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-
-            // Build countdown HTML
-            let countdownHTML = `
-                <div class="countdown-label">Celebration begins in</div>
-                <div class="countdown-boxes">
-                    <div class="cd-box">
-                        <div class="cd-value" id="cd-days">${pad(days)}</div>
-                        <div class="cd-unit">Days</div>
-                    </div>
-                    <div class="cd-separator">:</div>
-                    <div class="cd-box">
-                        <div class="cd-value" id="cd-hours">${pad(hours)}</div>
-                        <div class="cd-unit">Hours</div>
-                    </div>
-                    <div class="cd-separator">:</div>
-                    <div class="cd-box">
-                        <div class="cd-value" id="cd-mins">${pad(minutes)}</div>
-                        <div class="cd-unit">Mins</div>
-                    </div>
-                    <div class="cd-separator">:</div>
-                    <div class="cd-box">
-                        <div class="cd-value" id="cd-secs">${pad(seconds)}</div>
-                        <div class="cd-unit">Secs</div>
-                    </div>
-                </div>
-                <div class="celebration-title">${CELEBRATION_NAME}</div>
-            `;
-
-            countdownWrap.innerHTML = countdownHTML;
-
-            // Add tick animation
-            if (seconds !== prevSecs) {
-                const secsEl = document.getElementById('cd-secs');
-                if (secsEl) flashTick(secsEl);
-                
-                if (seconds === 59) {
-                    const minsEl = document.getElementById('cd-mins');
-                    if (minsEl) flashTick(minsEl);
-                }
-                
-                if (seconds === 59 && minutes === 59) {
-                    const hoursEl = document.getElementById('cd-hours');
-                    if (hoursEl) flashTick(hoursEl);
-                }
-                
-                prevSecs = seconds;
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // USER ACTIONS
-        // ════════════════════════════════════════════════════════════════
-
-        function startCelebration() {
-            if (new Date() < EID_DATE) return;
-            window.location.href = '1.html';
-        }
-
-        function showInfo() {
-            alert(
-                `${CELEBRATION_NAME} is a significant celebration.\n\n` +
-                'Eid Ul Adha is an Islamic festival celebrated by Muslims worldwide to commemorate ' +
-                'Prophet Ibrahim\'s willingness to sacrifice his son in obedience to God.\n\n' +
-                'It\'s a time for prayer, family gatherings, and sharing with those in need.'
-            );
-        }
-    </script>
+    function startCelebration() {
+        if (new Date() < EID_DATE) return;
+        window.location.href = "home.html";
+    }
+</script>
 </body>
 </html>
