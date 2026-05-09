@@ -1,177 +1,570 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System Error</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eid Ul Adha Celebration</title>
     <style>
-        :root {
-            --ios-gray: #8e8e93;
-            --ios-blue: #007aff;
-        }
-        body, html {
-            margin: 0;
+        * {
             padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 40px 20px;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeIn 1.2s ease-out 0.3s both;
+        }
+
+        .start-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(245, 87, 108, 0.6);
+        }
+
+        .start-btn:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .info-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-btn {
+            padding: 10px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .decorative-elements {
+            position: absolute;
             width: 100%;
             height: 100%;
-            background-color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: white;
+            top: 0;
+            left: 0;
+            pointer-events: none;
             overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .countdown-wrap {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 12px;
+            animation: fadeIn 1s ease-out 0.5s both;
+            width: 100%;
+        }
+
+        .countdown-label {
+            color: rgba(255,255,255,0.55);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .countdown-boxes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             justify-content: center;
-            user-select: none;
+            align-items: center;
         }
 
-        /* Fake Dead Pixel Prank */
-        .dead-pixel {
-            position: fixed;
-            width: 2px;
-            height: 2px;
-            background: #ff0000;
-            top: 25%;
-            left: 40%;
-            z-index: 9999;
-            box-shadow: 0 0 2px #ff0000;
+        .cd-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* Low Battery Icon */
-        .battery-container {
-            width: 120px;
-            height: 50px;
-            border: 4px solid #fff;
-            border-radius: 10px;
+        .cd-value {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.18);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
             position: relative;
-            padding: 4px;
-            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
         }
-        .battery-container::after {
+
+        .cd-value::before {
             content: '';
             position: absolute;
-            right: -12px;
-            top: 12px;
-            width: 8px;
-            height: 20px;
-            background: #fff;
-            border-radius: 0 4px 4px 0;
-        }
-        .battery-level {
-            width: 5%;
-            height: 100%;
-            background-color: #ff3b30; /* Critical Red */
-            border-radius: 4px;
-            animation: blink 0.8s infinite;
+            top: 0; left: 0; right: 0;
+            height: 50%;
+            background: rgba(255,255,255,0.04);
+            border-radius: 14px 14px 0 0;
         }
 
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0; }
-            100% { opacity: 1; }
+        .cd-value.tick {
+            transform: scale(1.1);
+            color: #ffd700;
+            border-color: rgba(255,215,0,0.5);
+            box-shadow: 0 0 24px rgba(255,215,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
-        /* Fake System Alert */
-        .alert-box {
-            background: rgba(255, 255, 255, 0.9);
-            color: black;
-            width: 80%;
-            max-width: 300px;
-            border-radius: 14px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            display: block;
-        }
-        .alert-title {
-            font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .alert-msg {
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        .alert-btn {
-            color: var(--ios-blue);
-            font-weight: 600;
-            font-size: 17px;
-            border-top: 1px solid #ccc;
-            padding-top: 15px;
-            width: 100%;
-            display: block;
-            text-decoration: none;
-        }
-
-        /* Brightness "Dimming" effect */
-        .dimmer {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            pointer-events: none;
-            z-index: 500;
-        }
-
-        #hidden-message {
-            display: none;
-            color: #444;
+        .cd-unit {
             font-size: 10px;
-            margin-top: 50px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .cd-separator {
+            font-size: 28px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            padding-bottom: 18px;
+            line-height: 1;
+        }
+
+        .eid-started-msg {
+            font-size: 16px;
+            letter-spacing: 2px;
+            color: #ffd700;
+            font-family: 'Segoe UI', sans-serif;
+            text-shadow: 0 0 20px rgba(255,215,0,0.6);
+            animation: pulseGold 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseGold {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .celebration-title {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 36px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .start-btn,
+            .info-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .cd-value { 
+                width: 56px; 
+                height: 56px; 
+                font-size: 24px; 
+                border-radius: 10px; 
+            }
+
+            .cd-separator { 
+                font-size: 20px; 
+            }
+
+            .countdown-boxes { 
+                gap: 6px; 
+            }
         }
     </style>
 </head>
-<body onclick="shakePhone()">
+<body>
+    <div class="decorative-elements" id="stars"></div>
 
-    <div class="dead-pixel"></div>
-    
-    <div class="dimmer"></div>
+    <header>
+        <h1>🌙 <span id="headerTitle">Eid Ul Adha</span> 🌙</h1>
+        <p class="subtitle">Celebration of Sacrifice & Joy</p>
+    </header>
 
-    <div class="battery-container">
-        <div class="battery-level"></div>
-    </div>
-
-    <div class="alert-box" id="main-alert">
-        <div class="alert-title">Low Battery</div>
-        <div class="alert-msg">
-            Battery level has dropped to 1%. System will shut down unless a charger is connected immediately.
+    <div class="container">
+        <div class="button-group">
+            <button class="start-btn" id="startBtn" onclick="startCelebration()" disabled>Start Celebration</button>
+            <button class="info-btn" onclick="showInfo()">Learn More</button>
         </div>
-        <div class="alert-btn" onclick="scareUser()">Close</div>
+
+        <div class="countdown-wrap" id="countdownWrap">
+            <div class="countdown-label">Loading celebration time<span class="loading-spinner"></span></div>
+        </div>
+
+        <a href="admin.html" class="admin-btn">⚙️ Admin Panel</a>
     </div>
 
-    <div id="hidden-message">You've been pranked. There is no charger.</div>
+    <footer>
+        <p>Wishing you a blessed Eid filled with joy and happiness! 🎉</p>
+    </footer>
 
     <script>
-        // Trigger vibration on click (if supported)
-        function scareUser() {
-            if ("vibrate" in navigator) {
-                navigator.vibrate([100, 50, 100, 50, 300]);
+        // ════════════════════════════════════════════════════════════════
+        // CONFIGURATION - GAS DEPLOYMENT URL
+        // ════════════════════════════════════════════════════════════════
+        
+        const GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbwT-13HXjHRLkWvhh1AlK1itZpxntG5fVVb1T_g4JcdTPiJSnYLl7QQLWlXal96IJU/exec';
+        
+        let EID_DATE = null;
+        let CELEBRATION_NAME = 'Eid Ul Adha';
+
+        // ════════════════════════════════════════════════════════════════
+        // INITIALIZE
+        // ════════════════════════════════════════════════════════════════
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            generateStars();
+            await loadCelebrationData();
+            updateState();
+            setInterval(updateState, 1000);
+        });
+
+        // ════════════════════════════════════════════════════════════════
+        // LOAD CELEBRATION DATA FROM GAS
+        // ════════════════════════════════════════════════════════════════
+
+        async function loadCelebrationData() {
+            try {
+                if (GAS_DEPLOYMENT_URL.includes('YOUR_DEPLOYMENT_ID')) {
+                    // Use fallback/default data
+                    EID_DATE = new Date(2026, 4, 27, 20, 30, 0);
+                    CELEBRATION_NAME = 'Eid Ul Adha';
+                    console.warn('GAS URL not configured, using default date');
+                    return;
+                }
+
+                const url = new URL(GAS_DEPLOYMENT_URL);
+                url.searchParams.append('action', 'getCelebration');
+
+                const response = await fetch(url.toString(), {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.eidDate) {
+                    EID_DATE = new Date(data.eidDate);
+                    CELEBRATION_NAME = data.celebrationName || 'Eid Ul Adha';
+                    
+                    // Update header
+                    document.getElementById('headerTitle').textContent = CELEBRATION_NAME;
+                    
+                    console.log('Loaded celebration:', {
+                        date: EID_DATE,
+                        name: CELEBRATION_NAME
+                    });
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (error) {
+                console.error('Failed to load celebration data:', error);
+                // Use default fallback
+                EID_DATE = new Date(2026, 4, 27, 20, 30, 0);
+                CELEBRATION_NAME = 'Eid Ul Adha';
             }
-            
-            const alertBox = document.getElementById('main-alert');
-            alertBox.style.display = 'none';
-            
-            // Show the "Dark Screen"
-            document.body.style.backgroundColor = "black";
-            
-            setTimeout(() => {
-                alert("ERROR: System.Energy.Critical - Shutdown failed successfully.");
-                document.getElementById('hidden-message').style.display = 'block';
-            }, 1000);
         }
 
-        function shakePhone() {
-             if ("vibrate" in navigator) {
-                navigator.vibrate(50);
+        // ════════════════════════════════════════════════════════════════
+        // COUNTDOWN LOGIC
+        // ════════════════════════════════════════════════════════════════
+
+        function generateStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
             }
         }
 
-        // Prevent typical mobile behavior to make it feel like a frozen OS
-        document.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-        }, { passive: false });
+        function pad(n) {
+            return String(n).padStart(2, '0');
+        }
+
+        function flashTick(el) {
+            el.classList.add('tick');
+            setTimeout(() => el.classList.remove('tick'), 300);
+        }
+
+        let prevSecs = -1;
+
+        function updateState() {
+            if (!EID_DATE) return;
+
+            const now = new Date();
+            const diff = EID_DATE - now;
+            const countdownWrap = document.getElementById('countdownWrap');
+            const startBtn = document.getElementById('startBtn');
+
+            if (diff <= 0) {
+                // Celebration has started
+                startBtn.disabled = false;
+                countdownWrap.innerHTML = `
+                    <div class="eid-started-msg">
+                        🌙 ${CELEBRATION_NAME} has begun! 🎉
+                    </div>
+                    <div class="celebration-title">May blessings flow to you and your loved ones</div>
+                `;
+                return;
+            }
+
+            // Celebration hasn't started yet
+            startBtn.disabled = true;
+
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            // Build countdown HTML
+            let countdownHTML = `
+                <div class="countdown-label">Celebration begins in</div>
+                <div class="countdown-boxes">
+                    <div class="cd-box">
+                        <div class="cd-value" id="cd-days">${pad(days)}</div>
+                        <div class="cd-unit">Days</div>
+                    </div>
+                    <div class="cd-separator">:</div>
+                    <div class="cd-box">
+                        <div class="cd-value" id="cd-hours">${pad(hours)}</div>
+                        <div class="cd-unit">Hours</div>
+                    </div>
+                    <div class="cd-separator">:</div>
+                    <div class="cd-box">
+                        <div class="cd-value" id="cd-mins">${pad(minutes)}</div>
+                        <div class="cd-unit">Mins</div>
+                    </div>
+                    <div class="cd-separator">:</div>
+                    <div class="cd-box">
+                        <div class="cd-value" id="cd-secs">${pad(seconds)}</div>
+                        <div class="cd-unit">Secs</div>
+                    </div>
+                </div>
+                <div class="celebration-title">${CELEBRATION_NAME}</div>
+            `;
+
+            countdownWrap.innerHTML = countdownHTML;
+
+            // Add tick animation
+            if (seconds !== prevSecs) {
+                const secsEl = document.getElementById('cd-secs');
+                if (secsEl) flashTick(secsEl);
+                
+                if (seconds === 59) {
+                    const minsEl = document.getElementById('cd-mins');
+                    if (minsEl) flashTick(minsEl);
+                }
+                
+                if (seconds === 59 && minutes === 59) {
+                    const hoursEl = document.getElementById('cd-hours');
+                    if (hoursEl) flashTick(hoursEl);
+                }
+                
+                prevSecs = seconds;
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // USER ACTIONS
+        // ════════════════════════════════════════════════════════════════
+
+        function startCelebration() {
+            if (new Date() < EID_DATE) return;
+            window.location.href = '1.html';
+        }
+
+        function showInfo() {
+            alert(
+                `${CELEBRATION_NAME} is a significant celebration.\n\n` +
+                'Eid Ul Adha is an Islamic festival celebrated by Muslims worldwide to commemorate ' +
+                'Prophet Ibrahim\'s willingness to sacrifice his son in obedience to God.\n\n' +
+                'It\'s a time for prayer, family gatherings, and sharing with those in need.'
+            );
+        }
     </script>
 </body>
 </html>
